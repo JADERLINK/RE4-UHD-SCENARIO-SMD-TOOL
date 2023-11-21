@@ -1,0 +1,239 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Globalization;
+using System.IO;
+using RE4_UHD_BIN_TOOL.ALL;
+using RE4_UHD_BIN_TOOL.EXTRACT;
+
+namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
+{
+    public static class UhdScenarioExtract
+    {
+        public static IdxMaterial IdxMaterialMultParser(Dictionary<int, UhdBIN> uhdBinDic, out Dictionary<MaterialPart, string> invDic)
+        {
+            IdxMaterial idx = new IdxMaterial();
+            idx.MaterialDic = new Dictionary<string, MaterialPart>();
+            invDic = new Dictionary<MaterialPart, string>();
+
+            int counter = 0;
+
+            foreach (var item in uhdBinDic)
+            {
+                for (int i = 0; i < item.Value.Materials.Length; i++)
+                {
+                    var mat = item.Value.Materials[i].material;
+
+                    if (!invDic.ContainsKey(mat))
+                    {
+                        string matKey = CONSTs.SCENARIO_MATERIAL + counter.ToString("D3");
+                        invDic.Add(mat, matKey);
+                        idx.MaterialDic.Add(matKey, mat);
+                        counter++;
+                    }
+
+                }
+            }
+
+            return idx;
+        }
+
+
+        public static void CreateOBJ(SMDLine[] smdLines, Dictionary<int, UhdBIN> uhdBinDic, Dictionary<MaterialPart, string> materialList, string baseDirectory, string baseFileName, bool UseColorsInObjFile)
+        {
+            StreamWriter obj = new StreamWriter(baseDirectory + baseFileName + ".obj", false);
+            obj.WriteLine(Program.headerText());
+            obj.WriteLine("");
+
+            obj.WriteLine("mtllib " + baseFileName + ".mtl");
+
+            uint indexCount = 0;
+
+            for (int i = 0; i < smdLines.Length; i++)
+            {
+                int key = smdLines[i].BinID;
+                if (uhdBinDic.ContainsKey(key))
+                {
+                    ObjCreatePart(i, obj, uhdBinDic[key], smdLines[i], materialList, ref indexCount, UseColorsInObjFile);
+                }
+
+            }
+
+            obj.Close();
+        }
+
+  
+        private static void ObjCreatePart(int smdID, StreamWriter obj, UhdBIN uhdbin, SMDLine smdLine, Dictionary<MaterialPart, string> materialList, ref uint indexCount, bool UseColorsInObjFile)
+        {
+
+            obj.WriteLine("g " + "UHDSCENARIO#SMD_" + smdID.ToString("D3") + "#SMX_" + smdLine.SmxID.ToString("D3") 
+                + "#TYPE_" + smdLine.objectStatus.ToString("X2") + "#BIN_" + smdLine.BinID.ToString("D3") + "#");
+
+            float NORMAL_FIX = uhdbin.Header.ReturnsNormalsFixValue();
+
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+        
+            for (int i = 0; i < uhdbin.Vertex_Position_Array.Length; i++)
+            {
+                float[] pos = new float[3];// 0 = x, 1 = y, 2 = z
+                pos[0] = uhdbin.Vertex_Position_Array[i].vx;
+                pos[1] = uhdbin.Vertex_Position_Array[i].vy;
+                pos[2] = uhdbin.Vertex_Position_Array[i].vz;
+
+                pos = RotationUtils.RotationInX(pos, smdLine.angleX);
+                pos = RotationUtils.RotationInY(pos, smdLine.angleY);
+                pos = RotationUtils.RotationInZ(pos, smdLine.angleZ);
+
+                pos[0] = ((pos[0] * smdLine.scaleX) + (smdLine.positionX)) / CONSTs.GLOBAL_POSITION_SCALE;
+                pos[1] = ((pos[1] * smdLine.scaleY) + (smdLine.positionY)) / CONSTs.GLOBAL_POSITION_SCALE;
+                pos[2] = ((pos[2] * smdLine.scaleZ) + (smdLine.positionZ)) / CONSTs.GLOBAL_POSITION_SCALE;
+
+                string v = "v " + (pos[0]).ToString("F9", inv)
+                          + " " + (pos[1]).ToString("F9", inv)
+                          + " " + (pos[2]).ToString("F9", inv);
+
+                if (UseColorsInObjFile && uhdbin.Vertex_Color_Array.Length > i)
+                {
+                    v += " " + (uhdbin.Vertex_Color_Array[i].r).ToString("F9", inv)
+                       + " " + (uhdbin.Vertex_Color_Array[i].g).ToString("F9", inv)
+                       + " " + (uhdbin.Vertex_Color_Array[i].b).ToString("F9", inv)
+                       + " " + (uhdbin.Vertex_Color_Array[i].a).ToString("F9", inv);
+                }
+                obj.WriteLine(v);
+
+            }
+
+            for (int i = 0; i < uhdbin.Vertex_Normal_Array.Length; i++)
+            {
+                float nx = uhdbin.Vertex_Normal_Array[i].nx / NORMAL_FIX;
+                float ny = uhdbin.Vertex_Normal_Array[i].ny / NORMAL_FIX;
+                float nz = uhdbin.Vertex_Normal_Array[i].nz / NORMAL_FIX;
+                obj.WriteLine("vn " + nx.ToString("F9", inv) + " " + ny.ToString("F9", inv) + " " + nz.ToString("F9", inv));
+            }
+
+            for (int i = 0; i < uhdbin.Vertex_UV_Array.Length; i++)
+            {
+                float tu = uhdbin.Vertex_UV_Array[i].tu;
+                float tv = (uhdbin.Vertex_UV_Array[i].tv - 1) * -1;
+                obj.WriteLine("vt " + tu.ToString("F9", inv) + " " + tv.ToString("F9", inv));
+            }
+
+
+            for (int g = 0; g < uhdbin.Materials.Length; g++)
+            {
+                obj.WriteLine("usemtl " + materialList[uhdbin.Materials[g].material]);
+
+                for (int i = 0; i < uhdbin.Materials[g].face_index_array.Length; i++)
+                {
+                    string a = (uhdbin.Materials[g].face_index_array[i].i1 + indexCount + 1).ToString();
+                    string b = (uhdbin.Materials[g].face_index_array[i].i2 + indexCount + 1).ToString();
+                    string c = (uhdbin.Materials[g].face_index_array[i].i3 + indexCount + 1).ToString();
+
+                    obj.WriteLine("f " + a + "/" + a + "/" + a
+                                 + " " + b + "/" + b + "/" + b
+                                 + " " + c + "/" + c + "/" + c);
+                }
+
+
+            }
+
+            indexCount += (uint)uhdbin.Vertex_Position_Array.Length;
+
+        }
+
+
+        public static void CreateIdxScenario(SMDLine[] smdLines,string binFolder, string baseDirectory, string baseFileName, string SmdFileName)
+        {
+            //
+            TextWriter text = new FileInfo(baseDirectory + baseFileName + ".idxuhdscenario").CreateText();
+            text.WriteLine(Program.headerText());
+            text.WriteLine("");
+
+            text.WriteLine("SmdAmount:" + smdLines.Length);
+            text.WriteLine("SmdFileName:" + SmdFileName);
+            text.WriteLine("BinFolder:" + binFolder);
+            text.WriteLine("UseIdxMaterial:false");
+            text.WriteLine("EnableVertexColor:false");
+
+            text.WriteLine("");
+            for (int i = 0; i < smdLines.Length; i++)
+            {
+                text.WriteLine("");
+                CreateIdxScenario_parts(i, ref text, smdLines[i]);
+            }
+
+            text.Close();
+
+
+        }
+
+
+        private static void CreateIdxScenario_parts(int id, ref TextWriter text, SMDLine smdLine)
+        {
+            string scaleX = (smdLine.scaleX).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            string scaleY = (smdLine.scaleY).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            string scaleZ = (smdLine.scaleZ).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            text.WriteLine(id.ToString("D3") + "_scaleX:" + scaleX);
+            text.WriteLine(id.ToString("D3") + "_scaleY:" + scaleY);
+            text.WriteLine(id.ToString("D3") + "_scaleZ:" + scaleZ);
+
+            string angleX = (smdLine.angleX).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            string angleY = (smdLine.angleY).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            string angleZ = (smdLine.angleZ).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            text.WriteLine(id.ToString("D3") + "_angleX:" + angleX);
+            text.WriteLine(id.ToString("D3") + "_angleY:" + angleY);
+            text.WriteLine(id.ToString("D3") + "_angleZ:" + angleZ);
+
+            string positionX = (smdLine.positionX / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            string positionY = (smdLine.positionY / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            string positionZ = (smdLine.positionZ / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            text.WriteLine(id.ToString("D3") + "_positionX:" + positionX);
+            text.WriteLine(id.ToString("D3") + "_positionY:" + positionY);
+            text.WriteLine(id.ToString("D3") + "_positionZ:" + positionZ);
+
+        }
+
+        public static void CreateIdxuhdSmd(SMDLine[] smdLines, string binFolder, string baseDirectory, string baseFileName, string SmdFileName, int binAmount)
+        {
+            TextWriter text = new FileInfo(baseDirectory + baseFileName + ".idxuhdsmd").CreateText();
+            text.WriteLine(Program.headerText());
+            text.WriteLine("");
+
+            text.WriteLine("SmdAmount:" + smdLines.Length);
+            text.WriteLine("SmdFileName:" + SmdFileName);
+            text.WriteLine("BinFolder:" + binFolder);
+            text.WriteLine("BinAmount:" + binAmount);
+
+            text.WriteLine("");
+            for (int i = 0; i < smdLines.Length; i++)
+            {
+                text.WriteLine("");
+                CreateIdxScenario_parts(i, ref text, smdLines[i]);
+                CreateIdxuhdSmd_parts(i, ref text, smdLines[i]);
+            }
+
+            text.Close();
+
+        }
+
+        private static void CreateIdxuhdSmd_parts(int id, ref TextWriter text, SMDLine smdLine) 
+        {
+            text.WriteLine(id.ToString("D3") + "_BinID:" + smdLine.BinID);
+            text.WriteLine(id.ToString("D3") + "_FixedFF:" + smdLine.FixedFF.ToString("X2"));
+            text.WriteLine(id.ToString("D3") + "_SmxID:" + smdLine.SmxID);
+            text.WriteLine(id.ToString("D3") + "_unused1:" + smdLine.unused1.ToString("X8"));
+            text.WriteLine(id.ToString("D3") + "_unused2:" + smdLine.unused2.ToString("X8"));
+            text.WriteLine(id.ToString("D3") + "_unused3:" + smdLine.unused3.ToString("X8"));
+            text.WriteLine(id.ToString("D3") + "_unused4:" + smdLine.unused4.ToString("X8"));
+            text.WriteLine(id.ToString("D3") + "_unused5:" + smdLine.unused5.ToString("X8"));
+            text.WriteLine(id.ToString("D3") + "_unused6:" + smdLine.unused6.ToString("X8"));
+            text.WriteLine(id.ToString("D3") + "_unused7:" + smdLine.unused7.ToString("X8"));
+            text.WriteLine(id.ToString("D3") + "_objectStatus:" + smdLine.objectStatus.ToString("X8"));
+        }
+
+
+    }
+
+}
