@@ -4,15 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using ObjLoader.Loader.Loaders;
 using RE4_UHD_BIN_TOOL.REPACK.Structures;
 using RE4_UHD_BIN_TOOL.REPACK;
 
+
 namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 {
-    public static partial class UhdScenarioRepack
+    public static partial class R100Repack
     {
-        public static void RepackOBJ(Stream objFile, ref IdxUhdScenario idxScenario, out Dictionary<int, SmdBaseLine> objGroupInfos, out Dictionary<int, FinalStructure> FinalBinList)
+        private static void RepackOBJ(Stream objFile, ref R100RepackIdx idx, 
+            out Dictionary<int, Dictionary<int, SmdBaseLine>> objGroupInfosList, 
+            out Dictionary<int, Dictionary<int, FinalStructure>> FinalBinListDic,
+            out int[] maxBin)
         {
             bool LoadColorsFromObjFile = true;
 
@@ -27,42 +30,58 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             HashSet<string> ModelMaterials = new HashSet<string>();
             HashSet<string> ModelMaterialsToUpper = new HashSet<string>();
 
-
             Vector4 color = new Vector4(1, 1, 1, 1);
             StartWeightMap weightMap = new StartWeightMap(1, 0, 1, 0, 0, 0, 0);
 
+            //id do file, (id do bin, conteudo do bin)
+            FinalBinListDic = new Dictionary<int, Dictionary<int, FinalStructure>>();
 
             //conjunto de struturas
-            //id do SMD/ conteudo para o SMD/BIN
-            Dictionary<int, StartStructure> ObjList = new Dictionary<int, StartStructure>();
-            //id do SMD, outras informações 
-            objGroupInfos = new Dictionary<int, SmdBaseLine>();
-            int maxSmd = 0;
-            int maxBin = 0;
 
+            //(id do file, "type")(id do SMD/ conteudo para o SMD/BIN)
+            Dictionary<(int file, bool type), Dictionary<int, StartStructure>> ObjListDic = new Dictionary<(int file, bool type), Dictionary<int, StartStructure>>();
+            
+            //id do file, (id do SMD, outras informações)
+            objGroupInfosList = new Dictionary<int, Dictionary<int, SmdBaseLine>>();
+
+            for (int fil = 0; fil < FileAmount; fil++)
+            {
+                objGroupInfosList.Add(fil, new Dictionary<int, SmdBaseLine>());
+            }
+
+            int[] maxSmd = new int[FileAmount];
+            maxBin = new int[FileAmount];
+
+
+            //converte o obj
             for (int iG = 0; iG < arqObj.Groups.Count; iG++)
             {
                 string GroupName = arqObj.Groups[iG].GroupName.ToUpperInvariant().Trim();
 
-                if (GroupName.StartsWith("UHDSCENARIO"))
+                if (GroupName.StartsWith("#FILE") || GroupName.StartsWith("FILE"))
                 {
                     Console.WriteLine("Loading in Obj: " + GroupName);
 
-                    SmdBaseLine info = getGroupInfo(GroupName);
+                    int fileID = 0;
 
-                    if (!objGroupInfos.ContainsKey(info.SmdId))
+                    SmdBaseLine info = getGroupInfo(GroupName, out fileID);
+
+                    if (!objGroupInfosList.ContainsKey(fileID))
                     {
-                        objGroupInfos.Add(info.SmdId, info);
+                        objGroupInfosList.Add(fileID, new Dictionary<int, SmdBaseLine>());
                     }
 
-                    if (info.SmdId >= maxSmd)
+                    if (!objGroupInfosList[fileID].ContainsKey(info.SmdId))
                     {
-                        maxSmd = info.SmdId +1;
+                        objGroupInfosList[fileID].Add(info.SmdId, info);
                     }
 
-                    if (info.BinId >= maxBin)
+                    if (fileID < FileAmount)
                     {
-                        maxBin = info.BinId +1;
+                        if (info.SmdId >= maxSmd[fileID])
+                        {
+                            maxSmd[fileID] = info.SmdId + 1;
+                        }
                     }
 
                     List<List<StartVertex>> facesList = new List<List<StartVertex>>();
@@ -155,17 +174,25 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     string materialNameInvariant = arqObj.Groups[iG].MaterialName.ToUpperInvariant().Trim();
                     string materialName = arqObj.Groups[iG].MaterialName.Trim();
 
-                    if (ObjList.ContainsKey(info.SmdId))
+                    bool type = (info.Type & 0x10) == 0x10;
+                    var key = (fileID, type);
+                    if (!ObjListDic.ContainsKey(key))
                     {
-                        if (ObjList[info.SmdId].FacesByMaterial.ContainsKey(materialNameInvariant))
+                        ObjListDic.Add(key, new Dictionary<int, StartStructure>());
+                    }
+
+
+                    if (ObjListDic[key].ContainsKey(info.SmdId))
+                    {
+                        if (ObjListDic[key][info.SmdId].FacesByMaterial.ContainsKey(materialNameInvariant))
                         {
-                            ObjList[info.SmdId].FacesByMaterial[materialNameInvariant].Faces.AddRange(facesList);
+                            ObjListDic[key][info.SmdId].FacesByMaterial[materialNameInvariant].Faces.AddRange(facesList);
                         }
                         else
                         {
                             ModelMaterials.Add(materialName);
                             ModelMaterialsToUpper.Add(materialNameInvariant);
-                            ObjList[info.SmdId].FacesByMaterial.Add(materialNameInvariant, new StartFacesGroup(facesList));
+                            ObjListDic[key][info.SmdId].FacesByMaterial.Add(materialNameInvariant, new StartFacesGroup(facesList));
                         }
                     }
                     else
@@ -174,76 +201,157 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                         ModelMaterials.Add(materialName);
                         ModelMaterialsToUpper.Add(materialNameInvariant);
                         startStructure.FacesByMaterial.Add(materialNameInvariant, new StartFacesGroup(facesList));
-                        ObjList.Add(info.SmdId, startStructure);
+                        ObjListDic[key].Add(info.SmdId, startStructure);
                     }
 
                 }
             }
 
 
-            if (idxScenario.SmdAmount < maxSmd)
+            // arruma quantidade de smd
+            for (int fil = 0; fil < FileAmount; fil++)
             {
-                idxScenario.SmdAmount = maxSmd;
-            }
-
-            if (idxScenario.BinAmount < maxBin)
-            {
-                idxScenario.BinAmount = maxBin;
-            }
-
-
-            for (int i = 0; i < idxScenario.SmdAmount; i++)
-            {
-                if (!objGroupInfos.ContainsKey(i))
+                if (idx.SmdAmount[fil] < maxSmd[fil])
                 {
-                    SmdBaseLine smdBaseLine = new SmdBaseLine();
-                    smdBaseLine.SmdId = i;
-                    smdBaseLine.SmxId = 0xFE;
-                    smdBaseLine.Type = 0;
-                    smdBaseLine.BinId = 0;
-                    objGroupInfos.Add(i, smdBaseLine);
+                    idx.SmdAmount[fil] = maxSmd[fil];
                 }
             }
 
-            //----
-            FinalBinList = new Dictionary<int, FinalStructure>();
-
-            foreach (var item in ObjList)
+            // adiciona SmdBaseLine faltante
+            for (int fil = 0; fil < FileAmount; fil++)
             {
-                int BinID = objGroupInfos[item.Key].BinId;
-
-                if (!FinalBinList.ContainsKey(BinID))
+                for (int i = 0; i < idx.SmdAmount[fil]; i++)
                 {
-                    // faz a compressão das vertives
-                    Console.WriteLine("BIN ID: " + BinID.ToString("D3"));
-                    item.Value.CompressAllFaces();
-                    //-----
-
-                    SMDLineIdx smdLineIdx = new SMDLineIdx();
-                    smdLineIdx.scaleX = 1f;
-                    smdLineIdx.scaleY = 1f;
-                    smdLineIdx.scaleZ = 1f;
-
-                    if (idxScenario.SmdLines.Length > item.Key)
+                    if (!objGroupInfosList.ContainsKey(fil))
                     {
-                        smdLineIdx = idxScenario.SmdLines[item.Key];
+                        objGroupInfosList.Add(fil, new Dictionary<int, SmdBaseLine>());
                     }
 
-                    var intermediary = BINrepackIntermediary.MakeIntermediaryStructure(item.Value, smdLineIdx, true);
-                    var level2 = BinRepack.MakeIntermediaryLevel2(intermediary);
-                    var final = BinRepack.MakeFinalStructure(level2);
-                    FinalBinList.Add(BinID, final);
+                    if (!objGroupInfosList[fil].ContainsKey(i))
+                    {
+                        SmdBaseLine smdBaseLine = new SmdBaseLine();
+                        smdBaseLine.SmdId = i;
+                        smdBaseLine.SmxId = 0xFE;
+                        smdBaseLine.Type = 0;
+                        smdBaseLine.BinId = 0;
+                        objGroupInfosList[fil].Add(i, smdBaseLine);
+                    }
                 }
+            }
+
+            //adiciona dos dictionary no FinalBinListDic
+            for (int fil = 0; fil < FileAmount; fil++)
+            {
+                FinalBinListDic.Add(fil, new Dictionary<int, FinalStructure>());
+            }
+
+            //bin para cada file
+            for (int fil = 0; fil < FileAmount; fil++)
+            {
+                var key = (fil, false);
+                if (ObjListDic.ContainsKey(key))
+                {
+                    foreach (var item in ObjListDic[key])
+                    {
+                        int BinID = objGroupInfosList[fil][item.Key].BinId;
+                        bool type = (objGroupInfosList[fil][item.Key].Type & 0x10) == 0x10;
+
+                        if (type == false && !FinalBinListDic[fil].ContainsKey(BinID))
+                        {
+                            // faz a compressão das vertives
+                            Console.WriteLine("FILE: " + fil + "  BIN ID: " + BinID.ToString("D3"));
+                            item.Value.CompressAllFaces();
+                            //-----
+
+                            SMDLineIdx smdLineIdx = new SMDLineIdx();
+                            smdLineIdx.scaleX = 1f;
+                            smdLineIdx.scaleY = 1f;
+                            smdLineIdx.scaleZ = 1f;
+
+                            if (idx.SmdLines[fil].Length > item.Key)
+                            {
+                                smdLineIdx = idx.SmdLines[fil][item.Key];
+                            }
+
+                            var intermediary = BINrepackIntermediary.MakeIntermediaryStructure(item.Value, smdLineIdx, true);
+                            var level2 = BinRepack.MakeIntermediaryLevel2(intermediary);
+                            var final = BinRepack.MakeFinalStructure(level2);
+                            FinalBinListDic[fil].Add(BinID, final);
+
+                            if (maxBin[fil] <= BinID)
+                            {
+                                maxBin[fil] = BinID +1;
+                            }
+                        }
+                    }
+                }
+
+            }
+            
+            //bin para o file 5 (faltantes)
+            for (int fil = 0; fil < FileAmount; fil++)
+            {
+                var key = (fil, true);
+                if (ObjListDic.ContainsKey(key))
+                {
+                    foreach (var item in ObjListDic[key])
+                    {
+                        int BinID = objGroupInfosList[fil][item.Key].BinId;
+                        bool type = (objGroupInfosList[fil][item.Key].Type & 0x10) == 0x10;
+
+                        if (type == true && !FinalBinListDic[r100_005].ContainsKey(BinID))
+                        {
+                            // faz a compressão das vertives
+                            Console.WriteLine("FILE: " + r100_005 + "  BIN ID: " + BinID.ToString("D3"));
+                            item.Value.CompressAllFaces();
+                            //-----
+
+                            SMDLineIdx smdLineIdx = new SMDLineIdx();
+                            smdLineIdx.scaleX = 1f;
+                            smdLineIdx.scaleY = 1f;
+                            smdLineIdx.scaleZ = 1f;
+
+                            if (idx.SmdLines[fil].Length > item.Key)
+                            {
+                                smdLineIdx = idx.SmdLines[fil][item.Key];
+                            }
+
+                            var intermediary = BINrepackIntermediary.MakeIntermediaryStructure(item.Value, smdLineIdx, true);
+                            var level2 = BinRepack.MakeIntermediaryLevel2(intermediary);
+                            var final = BinRepack.MakeFinalStructure(level2);
+                            FinalBinListDic[r100_005].Add(BinID, final);
+
+                            if (maxBin[r100_005] <= BinID)
+                            {
+                                maxBin[r100_005] = BinID + 1;
+                            }
+                        }
+
+
+                    }
+                }
+
             }
 
         }
 
 
-        private static SmdBaseLine getGroupInfo(string GroupName)
+        private static SmdBaseLine getGroupInfo(string GroupName, out int fileID)
         {
             SmdBaseLine line = new SmdBaseLine();
 
-            var split = GroupName.Split('#');
+            var split = GroupName.Split('#').Where(v => v.Length != 0).ToArray();
+
+            try
+            {
+                var subSplit = split[0].Split('_');
+                int id = int.Parse(subSplit[1].Trim(), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
+                fileID = id;
+            }
+            catch (Exception)
+            {
+                fileID = 0;
+            }
 
             try
             {
@@ -287,6 +395,8 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
             return line;
         }
+
+
 
 
     }

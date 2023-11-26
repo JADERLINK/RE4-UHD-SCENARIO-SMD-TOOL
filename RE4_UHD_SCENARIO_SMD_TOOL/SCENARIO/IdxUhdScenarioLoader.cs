@@ -33,7 +33,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
                         if (!pair.ContainsKey(key))
                         {
-                            pair.Add(key, split[1]);
+                            pair.Add(key, split[1].Trim());
                         }
 
                     }
@@ -51,7 +51,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             try
             {
                 string value = Utils.ReturnValidDecValue(pair["SMDAMOUNT"]);
-                smdAmount = int.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
+                smdAmount = int.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
             }
             catch (Exception)
             {
@@ -103,7 +103,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             try
             {
                 string value = Utils.ReturnValidDecValue(pair["BINAMOUNT"]);
-                idxScenario.BinAmount = int.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
+                idxScenario.BinAmount = int.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
             }
             catch (Exception)
             {
@@ -125,6 +125,43 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             }
             catch (Exception)
             {
+            }
+
+            // new in B.1.0.0.1
+            //Magic
+            try
+            {
+                string value = Utils.ReturnValidHexValue(pair["MAGIC"]);
+                idxScenario.Magic = ushort.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            catch (Exception)
+            {
+                idxScenario.Magic = 0x0040;
+            }
+
+            int ExtraParameterAmount = 0;
+
+            try
+            {
+                string value = Utils.ReturnValidDecValue(pair["EXTRAPARAMETERAMOUNT"]);
+                ExtraParameterAmount = int.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            catch (Exception)
+            {
+            }
+
+            uint[] ExtraParameters = new uint[ExtraParameterAmount];
+
+            for (int i = 0; i < ExtraParameterAmount; i++)
+            {
+                try
+                {
+                    string value = Utils.ReturnValidDecValue(pair["EXTRAPARAMETER" + i]);
+                    ExtraParameters[i] = uint.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                }
             }
 
             //---
@@ -149,85 +186,15 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
                 SMDLineIdx smdline = new SMDLineIdx();
 
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[scaleXkey]);
-                    smdline.scaleX = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    smdline.scaleX = 1f;
-                }
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[scaleYkey]);
-                    smdline.scaleY = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    smdline.scaleY = 1f;
-                }
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[scaleZkey]);
-                    smdline.scaleZ = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    smdline.scaleZ = 1f;
-                }
-
-
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[positionXkey]);
-                    smdline.positionX = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                }
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[positionYkey]);
-                    smdline.positionY = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                }
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[positionZkey]);
-                    smdline.positionZ = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                }
-
-
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[angleXkey]);
-                    smdline.angleX = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                }
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[angleYkey]);
-                    smdline.angleY = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                }
-                try
-                {
-                    string value = Utils.ReturnValidFloatValue(pair[angleZkey]);
-                    smdline.angleZ = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                }
+                smdline.scaleX = GetFloat(ref pair, scaleXkey, 1f);
+                smdline.scaleY = GetFloat(ref pair, scaleYkey, 1f);
+                smdline.scaleZ = GetFloat(ref pair, scaleZkey, 1f);
+                smdline.positionX = GetFloat(ref pair, positionXkey, 0f);
+                smdline.positionY = GetFloat(ref pair, positionYkey, 0f);
+                smdline.positionZ = GetFloat(ref pair, positionZkey, 0f);
+                smdline.angleX = GetFloat(ref pair, angleXkey, 0f);
+                smdline.angleY = GetFloat(ref pair, angleYkey, 0f);
+                smdline.angleZ = GetFloat(ref pair, angleZkey, 0f);
 
                 smdLines[i] = smdline;
                 #endregion
@@ -248,115 +215,17 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
                 SMDLineIdxExtras extra = new SMDLineIdxExtras();
 
-                try
-                {
-                    string value = Utils.ReturnValidDecValue(pair[binIDkey]);
-                    extra.BinID = ushort.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.BinID = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidDecValue(pair[smdIDkey]);
-                    extra.SmxID = byte.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.SmxID = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[fixedFFkey]);
-                    extra.FixedFF = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.FixedFF = 0xFF;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[unused1key]);
-                    extra.unused1 = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.unused1 = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[unused2key]);
-                    extra.unused2 = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.unused2 = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[unused3key]);
-                    extra.unused3 = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.unused3 = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[unused4key]);
-                    extra.unused4 = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.unused4 = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[unused5key]);
-                    extra.unused5 = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.unused5 = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[unused6key]);
-                    extra.unused6 = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.unused6 = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[unused7key]);
-                    extra.unused7 = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.unused7 = 0;
-                }
-
-                try
-                {
-                    string value = Utils.ReturnValidHexValue(pair[objectStatuskey]);
-                    extra.objectStatus = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    extra.objectStatus = 0;
-                }
+                extra.BinID = GetUshortDec(ref pair, binIDkey, 0);
+                extra.SmxID = GetByteDec(ref pair, smdIDkey, 0);
+                extra.FixedFF = GetByteHex(ref pair, fixedFFkey, 0xFF);
+                extra.unused1 = GetUintHex(ref pair, unused1key, 0);
+                extra.unused2 = GetUintHex(ref pair, unused2key, 0);
+                extra.unused3 = GetUintHex(ref pair, unused3key, 0);
+                extra.unused4 = GetUintHex(ref pair, unused4key, 0);
+                extra.unused5 = GetUintHex(ref pair, unused5key, 0);
+                extra.unused6 = GetUintHex(ref pair, unused6key, 0);
+                extra.unused7 = GetUintHex(ref pair, unused7key, 0);
+                extra.objectStatus = GetUintHex(ref pair, objectStatuskey, 0);
 
                 SmdLinesExtras[i] = extra;
                 #endregion
@@ -367,6 +236,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             idxScenario.SmdAmount = smdAmount;
             idxScenario.SmdLines = smdLines;
             idxScenario.SmdLinesExtras = SmdLinesExtras;
+            idxScenario.ExtraParameters = ExtraParameters;
 
             //---
             idxFile.Close();
@@ -374,6 +244,107 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
             return idxScenario;
         }
+
+        public static float GetFloat(ref Dictionary<string, string> pair, string key, float DefaultValue) 
+        {
+            float res = DefaultValue;
+
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    string value = Utils.ReturnValidFloatValue(pair[key]);
+                    res = float.Parse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    res = DefaultValue;
+                }
+            }
+
+            return res;
+        }
+
+        public static ushort GetUshortDec(ref Dictionary<string, string> pair, string key, ushort DefaultValue) 
+        {
+            ushort res = DefaultValue;
+
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    string value = Utils.ReturnValidDecValue(pair[key]);
+                    res = ushort.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    res = DefaultValue;
+                }
+            }
+
+            return res;
+        }
+
+        public static byte GetByteDec(ref Dictionary<string, string> pair, string key, byte DefaultValue) 
+        {
+            byte res = DefaultValue;
+
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    string value = Utils.ReturnValidDecValue(pair[key]);
+                    res = byte.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    res = DefaultValue;
+                }
+            }
+
+            return res;
+        }
+
+        public static byte GetByteHex(ref Dictionary<string, string> pair, string key, byte DefaultValue)
+        {
+            byte res = DefaultValue;
+
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    string value = Utils.ReturnValidHexValue(pair[key]);
+                    res = byte.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    res = DefaultValue;
+                }
+            }
+
+            return res;
+        }
+
+        public static uint GetUintHex(ref Dictionary<string, string> pair, string key, uint DefaultValue) 
+        {
+            uint res = DefaultValue;
+
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    string value = Utils.ReturnValidHexValue(pair[key]);
+                    res = uint.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    res = DefaultValue;
+                }
+            }
+
+            return res;
+        }
+
 
     }
 
@@ -396,6 +367,10 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
         // only in .idxuhdsmd
         public int BinAmount = 0;
         public SMDLineIdxExtras[] SmdLinesExtras;
+
+        //new in B.1.0.0.1
+        public ushort Magic = 0x0040;
+        public uint[] ExtraParameters = new uint[0];
     }
 
     public class SMDLineIdx
@@ -413,7 +388,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
         public float scaleZ;   
     }
 
-    public class SMDLineIdxExtras 
+    public class SMDLineIdxExtras
     {
         // only in .idxuhdsmd
         public ushort BinID;

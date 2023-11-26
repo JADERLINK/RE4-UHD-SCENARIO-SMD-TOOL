@@ -27,13 +27,34 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             Stream stream = new FileInfo(baseDirectory + smdFileName).Create();
 
             byte[] header = new byte[0x10];
-            header[0] = 0x40;
+
+            byte[] b_Magic = BitConverter.GetBytes(idxScenario.Magic);
+            header[0] = b_Magic[0];
+            header[1] = b_Magic[1];
 
             byte[] b_SmdCount = BitConverter.GetBytes(SmdCount);
             header[2] = b_SmdCount[0];
             header[3] = b_SmdCount[1];
 
-            uint binStreamPosition = (uint)(SmdCount * 72) + 0x10;
+            uint binStreamPosition = (uint)((SmdCount * 72) + 0x10);
+
+            if (idxScenario.Magic == 0x0140)
+            {
+                uint amount = (uint)idxScenario.ExtraParameters.Length;
+                binStreamPosition += ((amount + 1) * 4);
+            }
+
+            uint SmdLinePadding = 0;
+            {
+                uint div = (binStreamPosition) / 16;
+                if (binStreamPosition % 16 != 0)
+                {
+                    div++;
+                }
+                SmdLinePadding = (div * 16) - (binStreamPosition);
+                binStreamPosition = div * 16;
+            }
+
             byte[] b_binStreamPosition = BitConverter.GetBytes(binStreamPosition);
             header[4] = b_binStreamPosition[0];
             header[5] = b_binStreamPosition[1];
@@ -41,6 +62,21 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             header[7] = b_binStreamPosition[3];
 
             stream.Write(header, 0, 0x10);
+
+            if (idxScenario.Magic == 0x0140)
+            {
+                uint amount = (uint)idxScenario.ExtraParameters.Length;
+                byte[] b_ExtraParameters = new byte[(amount + 1) * 4];
+                BitConverter.GetBytes(amount).CopyTo(b_ExtraParameters, 0);
+                int tempcounter = 4;
+                for (int i = 0; i < idxScenario.ExtraParameters.Length; i++)
+                {
+                    BitConverter.GetBytes(idxScenario.ExtraParameters[i]).CopyTo(b_ExtraParameters, tempcounter);
+                    tempcounter += 4;
+                }
+
+                stream.Write(b_ExtraParameters, 0, b_ExtraParameters.Length);
+            }
 
 
             for (int i = 0; i < SmdCount; i++)
@@ -96,6 +132,14 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
                 stream.Write(SMDLine, 0, 72);
             }
+
+
+            //SmdLinePadding
+            if (SmdLinePadding != 0)
+            {
+                stream.Write(new byte[SmdLinePadding], 0, (int)SmdLinePadding);
+            }
+
 
             //---------------------------
 

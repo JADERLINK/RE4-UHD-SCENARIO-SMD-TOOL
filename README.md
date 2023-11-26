@@ -5,6 +5,15 @@ Translate from Portuguese Brazil
 
 Programa destinado a extrair e recompactar os cenários usando somente um arquivo .OBJ;
 
+## Update B.1.0.0.1
+
+* Adicionado suporte para o **R100**, agora você pode extrair esse cenario dividido em 7 SMD, em um único arquivo .obj, use "R100.r100extract"; (Veja mais formações mais abaixo);
+* Adicionado verificação do "magic" do arquivo .Smd;
+* Nos arquivos ".idxuhdscenario" e ".idxuhdsmd" adicionados os campos "Magic" e "ExtraParameterAmount", no qual só vão aparecer caso forem usados.
+* O "Magic" padrão é o 0x0040;
+* Corrigido a extração do campo "vertexColors", no arquivo .obj;
+* Os arquivos da versão anterior são compatíveis com essa versão.
+
 ## RE4_UHD_SCENARIO_SMD_TOOL.exe
 
 Programa destinado a extrair e reempacotar os arquivos de cenario .SMD do re4 Uhd;
@@ -101,10 +110,14 @@ BinAmount:106 // quantidade de arquivos bins que serão colocados no .smd (campo
 Veja sobre em [RE4-UHD-BIN-TOOL](https://github.com/JADERLINK/RE4-UHD-BIN-TOOL);
 
 
+# sobre .r100extract e r100extract
+Para extrair o cenário coloque os arquivos .Smd necessários ao lado de .r100extract;
+<br> Nota: estarei fazendo um tutorial detalhado de como usar a tool e editar o r100;
+
 ## Código de terceiro:
 
 [ObjLoader by chrisjansson](https://github.com/chrisjansson/ObjLoader):
 Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL, código modificado, as modificações podem ser vistas aqui: [link](https://github.com/JADERLINK/ObjLoader).
 
 **At.te: JADERLINK**
-<br>2023-11-21
+<br>2023-11-26

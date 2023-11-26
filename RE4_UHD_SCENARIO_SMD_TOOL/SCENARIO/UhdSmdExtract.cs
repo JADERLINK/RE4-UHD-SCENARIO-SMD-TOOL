@@ -9,29 +9,56 @@ using RE4_UHD_BIN_TOOL.EXTRACT;
 
 namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 {
-    public static class UhdSmdExtract
+    public class UhdSmdExtract
     {
+        //Action<Stream fileStream, long binOffset, long endOffset, int binID>
+        public event Action<Stream, long, long, int> ToFileBin;
 
-        public static SMDLine[] Extract(Stream fileStream, out Dictionary<int, UhdBIN> uhdBinDic, out UhdTPL uhdTpl, string baseSubDirectory, bool extractBins)
+        //Action<Stream fileStream, long tplOffset, long endOffset>
+        public event Action<Stream, long, long> ToFileTpl;
+
+        public SMDLine[] Extract(Stream fileStream, out Dictionary<int, UhdBIN> uhdBinDic, out UhdTPL uhdTpl, out SmdMagic smdMagic, ref int binAmount)
         {
-            if (extractBins)
-            {
-                Directory.CreateDirectory(baseSubDirectory);
-            }
-
             BinaryReader br = new BinaryReader(fileStream);
 
-            ushort magic = br.ReadUInt16();
+            ushort Magic = br.ReadUInt16();
+            
+            // se não for um desses não é um .SMD valido;
+            // nota: tem o magic 0x00000, porem esse crasha o jogo
+            if (!(Magic == 0x0040 || Magic == 0x0140 || Magic == 0x0031 || Magic == 0x0020))
+            {
+                throw new ArgumentException("Invalid smd file!!!");
+            }
 
             ushort SmdLinesAmount = br.ReadUInt16();
 
             uint offsetBin = br.ReadUInt32(); // para offset dos bins (são relativos)
-            uint offsetTpl = br.ReadUInt32(); // tpl offset relativo (aponta para um offset, dele que vai pro tpl)
+            uint offsetTpl = br.ReadUInt32(); // tpl offset relativo (aponta para um offset (relativo), dele que vai pro tpl)
             uint offsetNone = br.ReadUInt32(); // no gc é o fim do arquivo, no de pc fica sendo o primeiro bin.
+
+            smdMagic = new SmdMagic();
+            smdMagic.magic = Magic;
+
+            // no magic 0x0140, tem parametros adicionais
+            if (Magic == 0x0140)
+            {
+                uint unkAmount = br.ReadUInt32();
+                smdMagic.extraParameters = new uint[unkAmount];
+                for (int i = 0; i < unkAmount; i++)
+                {
+                    uint unkValue = br.ReadUInt32();
+                    smdMagic.extraParameters[i] = unkValue;
+                }
+            }
+            else 
+            {
+                smdMagic.extraParameters = new uint[0];
+            }
+
 
             // 72 bytes por linha smd
 
-            int BinRealCount = 0;
+            int BinRealCount = binAmount;
 
             SMDLine[] SMDLines = new SMDLine[SmdLinesAmount];
 
@@ -83,6 +110,11 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     break;
                 }
                 binOffsets.Add(lastoffset + offsetBin);
+
+                if (binAmount <= i)
+                {
+                    binAmount = i + 1;
+                }
             }
 
             //get bin
@@ -102,25 +134,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     Console.WriteLine("Error on Read Bin in Smd: " + i.ToString("D3") + Environment.NewLine + ex.ToString());
                 }
 
-                if (extractBins)
-                {
-                    try
-                    {
-                        //le os bytes do bin e grava em um arquivo
-                        fileStream.Position = binOffsets[i];
-                        long lenght = endOffset - binOffsets[i];
-
-                        byte[] binArray = new byte[lenght];
-                        fileStream.Read(binArray, 0, (int)lenght);
-
-                        string binPath = baseSubDirectory + i.ToString("D4") + ".BIN";
-                        File.WriteAllBytes(binPath, binArray);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error on write in file: " + i.ToString("D3") + ".BIN" + Environment.NewLine + ex.ToString());
-                    }
-                }
+                ToFileBin?.Invoke(fileStream, binOffsets[i], endOffset, i);
 
             }
 
@@ -144,38 +158,90 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                 uhdTpl = null;
                 Console.WriteLine("Error on Read: Tpl in Smd"  + Environment.NewLine + ex.ToString());
             }
-           
 
-            if (extractBins)
+            ToFileTpl?.Invoke(fileStream, tplOffset, tplEndOffset);
+
+            return SMDLines;
+        }
+
+    }
+
+    public class ToFileMethods
+    {
+        private string DirectoryToSave = "";
+        private bool EnableExtract = false;
+
+        public ToFileMethods(string DirectoryToSave, bool EnableExtract) 
+        {
+            this.DirectoryToSave = DirectoryToSave;
+            this.EnableExtract = EnableExtract;
+            if (EnableExtract)
+            {
+                Directory.CreateDirectory(DirectoryToSave);
+            }
+        }
+
+        public void ToFileBin(Stream fileStream, long binOffset, long endOffset, int binID) 
+        {
+            if (EnableExtract)
+            {
+                try
+                {
+                    //le os bytes do bin e grava em um arquivo
+                    fileStream.Position = binOffset;
+                    long lenght = endOffset - binOffset;
+
+                    byte[] binArray = new byte[lenght];
+                    fileStream.Read(binArray, 0, (int)lenght);
+
+                    string binPath = DirectoryToSave + binID.ToString("D4") + ".BIN";
+                    File.WriteAllBytes(binPath, binArray);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error on write in file: " + binID.ToString("D3") + ".BIN" + Environment.NewLine + ex.ToString());
+                }
+            }
+        }
+
+        public void ToFileTpl(Stream fileStream, long tplOffset, long endOffset) 
+        {
+            if (EnableExtract)
             {
                 try
                 {
                     //le os bytes do tpl e grava em um arquivo
                     fileStream.Position = tplOffset;
-                    long tplLenght = tplEndOffset - tplOffset;
+                    long tplLenght = endOffset - tplOffset;
 
                     byte[] tplArray = new byte[tplLenght];
                     fileStream.Read(tplArray, 0, (int)tplLenght);
 
-                    string tplPath = baseSubDirectory + "TPL.TPL";
+                    string tplPath = DirectoryToSave + "TPL.TPL";
                     File.WriteAllBytes(tplPath, tplArray);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Error on write in file: TPL.TPL" + Environment.NewLine + ex.ToString());
                 }
-
             }
-            
-
-            br.Close();
-            return SMDLines;
         }
 
     }
 
 
-    public class SMDLine
+    public class SmdMagic
+    {
+        // "magic" é o inicio do arquivo .smd, os dois primeiro bytes
+        // na verdade, o magic é um byte, e o segundo byte é uma flag
+        // mais estou colocando os dois junto para simplificar.
+        public ushort magic = 0x0040;
+        // tem somente no magic 0x0140 do r100.udas/r100_004.SMD
+        // esses valores são a quantidade de "SMDLine", dos Smd que estão dentro dos arquivos .dat
+        public uint[] extraParameters = new uint[0];
+    }
+
+    public class SMDLine // SmdEntry
     {
         public float positionX;
         public float positionY;
@@ -198,6 +264,35 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
         public uint unused6;
         public uint unused7;
         public uint objectStatus;
+
+        public SMDLine Clone() 
+        {
+            SMDLine newLine = new SMDLine();
+            newLine.positionX = positionX;
+            newLine.positionY = positionY;
+            newLine.positionZ = positionZ;
+            newLine.angleX = angleX;
+            newLine.angleY = angleY;
+            newLine.angleZ = angleZ;
+            newLine.scaleX = scaleX;
+            newLine.scaleY = scaleY;
+            newLine.scaleZ = scaleZ;
+
+            newLine.BinID = BinID;
+            newLine.FixedFF = FixedFF;
+            newLine.SmxID = SmxID;
+            newLine.unused1 = unused1;
+            newLine.unused2 = unused2;
+            newLine.unused3 = unused3;
+            newLine.unused4 = unused4;
+            newLine.unused5 = unused5;
+            newLine.unused6 = unused6;
+            newLine.unused7 = unused7;
+            newLine.objectStatus = objectStatus;
+
+            return newLine;
+        }
+
     }
 
 }

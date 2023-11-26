@@ -9,17 +9,17 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
 {
     class Program
     {
-        public const string VERSION = "B.1.0.0.0";
+        public const string VERSION = "B.1.0.0.1";
 
         public static string headerText()
         {
             return "# RE4_UHD_SCENARIO_SMD_TOOL" + Environment.NewLine +
                    "# by: JADERLINK" + Environment.NewLine +
-                   "# Thanks to \"mariokart64n\" and \"CodeMan02Fr\"" + Environment.NewLine +
+                   "# Thanks to \"mariokart64n\" and \"CodeMan02Fr\", " + Environment.NewLine +
+                   "# Thanks to \"zatarita\", \"Mr.Curious\", \"Biohazard4X\" and \"kTeo\" for help with the r100 scenario;" + Environment.NewLine +
                    "# Material information by \"Albert\"" + Environment.NewLine +
                   $"# Version {VERSION}";
         }
-
 
         static void Main(string[] args)
         {
@@ -54,7 +54,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
                 Console.WriteLine("No arguments or file does not exist");
             }
 
-            Console.WriteLine("end");
+            Console.WriteLine("End");
         }
 
 
@@ -69,10 +69,16 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
                 string baseSubDirectory = Path.Combine(new string[] { baseDirectory, baseFileName }) + "\\";
                 Stream smdfile = fileInfo1.OpenRead();
 
-
+                SCENARIO.SmdMagic smdMagic;
                 Dictionary<int, RE4_UHD_BIN_TOOL.EXTRACT.UhdBIN> uhdBinDic;
                 RE4_UHD_BIN_TOOL.EXTRACT.UhdTPL uhdTpl;
-                SCENARIO.SMDLine[] smdLines = SCENARIO.UhdSmdExtract.Extract(smdfile, out uhdBinDic, out uhdTpl, baseSubDirectory, true);
+                SCENARIO.ToFileMethods toFileMethods = new SCENARIO.ToFileMethods(baseSubDirectory, true);
+                SCENARIO.UhdSmdExtract uhdSmdExtract = new SCENARIO.UhdSmdExtract();
+                uhdSmdExtract.ToFileBin += toFileMethods.ToFileBin;
+                uhdSmdExtract.ToFileTpl += toFileMethods.ToFileTpl;
+                int binAmount = 0;
+                SCENARIO.SMDLine[] smdLines = uhdSmdExtract.Extract(smdfile, out uhdBinDic, out uhdTpl, out smdMagic, ref binAmount);
+                smdfile.Close();
 
                 Dictionary<RE4_UHD_BIN_TOOL.ALL.MaterialPart, string> materialList;
 
@@ -86,8 +92,8 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
                 var mtl = RE4_UHD_BIN_TOOL.ALL.IdxMtlParser.Parser(idxMaterial, uhdTpl);
                 RE4_UHD_BIN_TOOL.EXTRACT.OutputMaterial.CreateMTL(mtl, baseDirectory, baseNameScenario);
 
-                SCENARIO.UhdScenarioExtract.CreateIdxScenario(smdLines, baseFileName, baseDirectory, baseNameScenario, fileInfo1.Name);
-                SCENARIO.UhdScenarioExtract.CreateIdxuhdSmd(smdLines, baseFileName, baseDirectory, baseNameScenario, fileInfo1.Name, uhdBinDic.Count);
+                SCENARIO.UhdScenarioExtract.CreateIdxScenario(smdLines, baseFileName, baseDirectory, baseNameScenario, fileInfo1.Name, smdMagic);
+                SCENARIO.UhdScenarioExtract.CreateIdxuhdSmd(smdLines, baseFileName, baseDirectory, baseNameScenario, fileInfo1.Name, binAmount, smdMagic);
             }
 
             // mode de repack (com um obj, para o cenario todo)
@@ -197,6 +203,8 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
 
                 if (idxMtl != null)
                 {
+                    Console.WriteLine("Converting .mtl");
+
                     new RE4_UHD_BIN_TOOL.REPACK.MtlConverter(baseDirectory).Convert(idxMtl, ref uhdTPL, out material);
                     RE4_UHD_BIN_TOOL.EXTRACT.OutputMaterial.CreateIdxUhdTpl(uhdTPL, baseDirectory, baseFileName + ".Repack");
                     RE4_UHD_BIN_TOOL.EXTRACT.OutputMaterial.CreateIdxMaterial(material, baseDirectory, baseFileName + ".Repack");
@@ -204,16 +212,23 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
 
                 // cria o arquivo smd e os bins
 
+                Console.WriteLine("Reading and converting .obj");
                 Dictionary<int, SCENARIO.SmdBaseLine> objGroupInfos = null;
                 Dictionary<int, RE4_UHD_BIN_TOOL.REPACK.Structures.FinalStructure> finalBinList = null;
                 SCENARIO.UhdScenarioRepack.RepackOBJ(objFile, ref idxUhdScenario, out objGroupInfos, out finalBinList);
 
+
                 //cria arquivo .smd
+                Console.WriteLine("Creating .SMD file");
                 SCENARIO.MakeSMD_Scenario.CreateSMD(baseDirectory, idxUhdScenario.SmdFileName, objGroupInfos, idxUhdScenario, finalBinList, material, uhdTPL, idxUhdScenario.EnableVertexColor, true);
 
                 //cria um novo idxuhdsmd
+                Console.WriteLine("Creating new .idxuhdsmd");
                 SCENARIO.SMDLine[] smdLines = SCENARIO.SmdLineParcer.Parser(idxUhdScenario.SmdAmount, idxUhdScenario.SmdLines, objGroupInfos);
-                SCENARIO.UhdScenarioExtract.CreateIdxuhdSmd(smdLines, idxUhdScenario.BinFolder, baseDirectory, baseFileName + ".Repack", idxUhdScenario.SmdFileName, idxUhdScenario.BinAmount);
+                SCENARIO.SmdMagic smdMagic = new SCENARIO.SmdMagic();
+                smdMagic.magic = idxUhdScenario.Magic;
+                smdMagic.extraParameters = idxUhdScenario.ExtraParameters;
+                SCENARIO.UhdScenarioExtract.CreateIdxuhdSmd(smdLines, idxUhdScenario.BinFolder, baseDirectory, baseFileName + ".Repack", idxUhdScenario.SmdFileName, idxUhdScenario.BinAmount, smdMagic);
 
             }
 
@@ -228,7 +243,19 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
                 SCENARIO.MakeSMD_WithBinFolder.CreateSMD(baseDirectory, idxUhdSmd);
             }
 
-            else 
+            //R100 extract
+            else if (file1Extension == ".R100EXTRACT")
+            {
+                SCENARIO.R100Extract.Extract(fileInfo1);
+            }
+
+            //R100 repack
+            else if (file1Extension == ".R100REPACK") 
+            {
+                SCENARIO.R100Repack.Repack(fileInfo1);
+            }
+
+            else
             {
                 Console.WriteLine("Invalid file format: " + file1Extension);
             }

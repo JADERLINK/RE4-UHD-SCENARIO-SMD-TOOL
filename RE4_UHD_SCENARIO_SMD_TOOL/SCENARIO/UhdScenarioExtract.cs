@@ -40,7 +40,6 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             return idx;
         }
 
-
         public static void CreateOBJ(SMDLine[] smdLines, Dictionary<int, UhdBIN> uhdBinDic, Dictionary<MaterialPart, string> materialList, string baseDirectory, string baseFileName, bool UseColorsInObjFile)
         {
             StreamWriter obj = new StreamWriter(baseDirectory + baseFileName + ".obj", false);
@@ -56,7 +55,13 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                 int key = smdLines[i].BinID;
                 if (uhdBinDic.ContainsKey(key))
                 {
-                    ObjCreatePart(i, obj, uhdBinDic[key], smdLines[i], materialList, ref indexCount, UseColorsInObjFile);
+                    int smdID = i;
+                    SMDLine smdLine = smdLines[i];
+
+                    obj.WriteLine("g " + "UHDSCENARIO#SMD_" + smdID.ToString("D3") + "#SMX_" + smdLine.SmxID.ToString("D3")
+                    + "#TYPE_" + smdLine.objectStatus.ToString("X2") + "#BIN_" + smdLine.BinID.ToString("D3") + "#");
+
+                    ObjCreatePart(obj, uhdBinDic[key], smdLine, materialList, ref indexCount, UseColorsInObjFile);
                 }
 
             }
@@ -64,16 +69,12 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             obj.Close();
         }
 
-  
-        private static void ObjCreatePart(int smdID, StreamWriter obj, UhdBIN uhdbin, SMDLine smdLine, Dictionary<MaterialPart, string> materialList, ref uint indexCount, bool UseColorsInObjFile)
+        public static void ObjCreatePart(StreamWriter obj, UhdBIN uhdbin, SMDLine smdLine, Dictionary<MaterialPart, string> materialList, ref uint indexCount, bool UseColorsInObjFile)
         {
-
-            obj.WriteLine("g " + "UHDSCENARIO#SMD_" + smdID.ToString("D3") + "#SMX_" + smdLine.SmxID.ToString("D3") 
-                + "#TYPE_" + smdLine.objectStatus.ToString("X2") + "#BIN_" + smdLine.BinID.ToString("D3") + "#");
 
             float NORMAL_FIX = uhdbin.Header.ReturnsNormalsFixValue();
 
-            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            var inv = CultureInfo.InvariantCulture;
         
             for (int i = 0; i < uhdbin.Vertex_Position_Array.Length; i++)
             {
@@ -94,7 +95,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                           + " " + (pos[1]).ToString("F9", inv)
                           + " " + (pos[2]).ToString("F9", inv);
 
-                if (UseColorsInObjFile && uhdbin.Vertex_Color_Array.Length > i)
+                if (UseColorsInObjFile && uhdbin.Header.ReturnsIsEnableVertexColors() && uhdbin.Vertex_Color_Array.Length > i)
                 {
                     v += " " + (uhdbin.Vertex_Color_Array[i].r).ToString("F9", inv)
                        + " " + (uhdbin.Vertex_Color_Array[i].g).ToString("F9", inv)
@@ -143,14 +144,31 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
         }
 
+        private static void PrintMagicInIDX(TextWriter text, SmdMagic smdMagic)
+        {
+            if (smdMagic.magic != 0x0040)
+            {
+                text.WriteLine("Magic:" + smdMagic.magic.ToString("X4"));
+            }
 
-        public static void CreateIdxScenario(SMDLine[] smdLines,string binFolder, string baseDirectory, string baseFileName, string SmdFileName)
+            if (smdMagic.extraParameters.Length != 0)
+            {
+                text.WriteLine("ExtraParameterAmount:" + smdMagic.extraParameters.Length);
+                for (int i = 0; i < smdMagic.extraParameters.Length; i++)
+                {
+                    text.WriteLine($"ExtraParameter{i}:" + smdMagic.extraParameters[i]);
+                }
+            }
+        }
+
+        public static void CreateIdxScenario(SMDLine[] smdLines, string binFolder, string baseDirectory, string baseFileName, string SmdFileName, SmdMagic smdMagic)
         {
             //
             TextWriter text = new FileInfo(baseDirectory + baseFileName + ".idxuhdscenario").CreateText();
             text.WriteLine(Program.headerText());
             text.WriteLine("");
 
+            PrintMagicInIDX(text, smdMagic);
             text.WriteLine("SmdAmount:" + smdLines.Length);
             text.WriteLine("SmdFileName:" + SmdFileName);
             text.WriteLine("BinFolder:" + binFolder);
@@ -169,38 +187,41 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
         }
 
-
         private static void CreateIdxScenario_parts(int id, ref TextWriter text, SMDLine smdLine)
         {
-            string scaleX = (smdLine.scaleX).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
-            string scaleY = (smdLine.scaleY).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
-            string scaleZ = (smdLine.scaleZ).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
-            text.WriteLine(id.ToString("D3") + "_scaleX:" + scaleX);
-            text.WriteLine(id.ToString("D3") + "_scaleY:" + scaleY);
-            text.WriteLine(id.ToString("D3") + "_scaleZ:" + scaleZ);
+            var inv = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+            inv.NumberFormat.NumberDecimalDigits = 9;
 
-            string angleX = (smdLine.angleX).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
-            string angleY = (smdLine.angleY).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
-            string angleZ = (smdLine.angleZ).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
-            text.WriteLine(id.ToString("D3") + "_angleX:" + angleX);
-            text.WriteLine(id.ToString("D3") + "_angleY:" + angleY);
-            text.WriteLine(id.ToString("D3") + "_angleZ:" + angleZ);
-
-            string positionX = (smdLine.positionX / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
-            string positionY = (smdLine.positionY / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
-            string positionZ = (smdLine.positionZ / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", System.Globalization.CultureInfo.InvariantCulture);
+            string positionX = (smdLine.positionX / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", inv);
+            string positionY = (smdLine.positionY / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", inv);
+            string positionZ = (smdLine.positionZ / CONSTs.GLOBAL_POSITION_SCALE).ToString("f9", inv);
             text.WriteLine(id.ToString("D3") + "_positionX:" + positionX);
             text.WriteLine(id.ToString("D3") + "_positionY:" + positionY);
             text.WriteLine(id.ToString("D3") + "_positionZ:" + positionZ);
 
+            string angleX = (smdLine.angleX).ToString("f9", inv);
+            string angleY = (smdLine.angleY).ToString("f9", inv);
+            string angleZ = (smdLine.angleZ).ToString("f9", inv);
+            text.WriteLine(id.ToString("D3") + "_angleX:" + angleX);
+            text.WriteLine(id.ToString("D3") + "_angleY:" + angleY);
+            text.WriteLine(id.ToString("D3") + "_angleZ:" + angleZ);
+
+            string scaleX = (smdLine.scaleX).ToString("f9", inv);
+            string scaleY = (smdLine.scaleY).ToString("f9", inv);
+            string scaleZ = (smdLine.scaleZ).ToString("f9", inv);
+            text.WriteLine(id.ToString("D3") + "_scaleX:" + scaleX);
+            text.WriteLine(id.ToString("D3") + "_scaleY:" + scaleY);
+            text.WriteLine(id.ToString("D3") + "_scaleZ:" + scaleZ);
+
         }
 
-        public static void CreateIdxuhdSmd(SMDLine[] smdLines, string binFolder, string baseDirectory, string baseFileName, string SmdFileName, int binAmount)
+        public static void CreateIdxuhdSmd(SMDLine[] smdLines, string binFolder, string baseDirectory, string baseFileName, string SmdFileName, int binAmount, SmdMagic smdMagic)
         {
             TextWriter text = new FileInfo(baseDirectory + baseFileName + ".idxuhdsmd").CreateText();
             text.WriteLine(Program.headerText());
             text.WriteLine("");
 
+            PrintMagicInIDX(text, smdMagic);
             text.WriteLine("SmdAmount:" + smdLines.Length);
             text.WriteLine("SmdFileName:" + SmdFileName);
             text.WriteLine("BinFolder:" + binFolder);

@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,7 +67,11 @@
     <Compile Include="REPACK\BINrepackIntermediaryL2.cs" />
     <Compile Include="SCENARIO\MakeSMD_Scenario.cs" />
     <Compile Include="SCENARIO\MakeSMD_WithBinFolder.cs" />
+    <Compile Include="SCENARIO\R100Extract.cs" />
+    <Compile Include="SCENARIO\R100Repack.cs" />
+    <Compile Include="SCENARIO\R100RepackOBJ.cs" />
     <Compile Include="SCENARIO\RotationUtils.cs" />
+    <Compile Include="SCENARIO\ScenarioHeaderExtension.cs" />
     <Compile Include="SCENARIO\SmdBaseLine.cs" />
     <Compile Include="SCENARIO\SmdLineParcer.cs" />
     <Compile Include="SCENARIO\UhdScenarioExtract.cs" />

@@ -8,9 +8,9 @@ using RE4_UHD_BIN_TOOL.ALL;
 
 namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 {
-    public static partial class UhdScenarioRepack
+    public static class BINrepackIntermediary
     {
-        private static IntermediaryStructure MakeIntermediaryStructure(StartStructure startStructure, SMDLineIdx smdLine, bool UseExtendedNormals)
+        public static IntermediaryStructure MakeIntermediaryStructure(StartStructure startStructure, SMDLineIdx smdLine, bool UseExtendedNormals)
         {
             float NORMAL_FIX = UseExtendedNormals ? CONSTs.GLOBAL_NORMAL_FIX_EXTENDED : CONSTs.GLOBAL_NORMAL_FIX_REDUCED;
 
