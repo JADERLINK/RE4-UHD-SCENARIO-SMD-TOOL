@@ -1,9 +1,14 @@
-# RE4-UHD-SCENARIO-SMD-TOOL
+# RE4-UHD-SCENARIO-SMD-TOOL
 Extract and repack RE4 UHD scenario smd file
 
-Translate from Portuguese Brazil
+**Translate from Portuguese Brazil**
 
 Programa destinado a extrair e recompactar os cenários usando somente um arquivo .OBJ;
+
+## Tutorial
+Veja abaixo tutoriais em português de como usar a tool:
+<br>[RE4 UHD Tutorial Editando Scenarios SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-SCENARIO-SMD.html)
+<br>[RE4 UHD Tutorial Editando r100.SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-R100-SMD.html)
 
 ## Update B.1.0.0.1
 
@@ -25,7 +30,7 @@ Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Extract all scenario SMD.bat"
 <br>Ao extrair será gerado os arquivos:
 
 * r204_04.scenario.idxuhdscenario  // arquivo importante de configurações, para o repack usando o .obj;
-* r204_04.scenario.idxuhdsmd //  arquivo importante de configurações, para o repack usando os arquivos .bin
+* r204_04.scenario.idxuhdsmd //  arquivo importante de configurações, para o repack usando os arquivos .bin;
 * r204_04.scenario.obj // conteúdo de todo o cenário, esse é o arquivo que você vai editar;
 * r204_04.scenario.mtl // arquivo que acompanha o .obj;
 * r204_04.scenario.idxmaterial // conteúdo dos materiais (alternativa ao uso do .mtl);
@@ -59,10 +64,10 @@ Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Repack all with idxuhdscenario.bat"
 Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Repack all with idxuhdsmd.bat"
 <br>Nesse exemplo vou usar o arquivo: "r204_04.scenario.idxuhdsmd"
 <br> que vai requisitar os arquivos:
-* os arquivos .bin e .tpl da pasta "r204_04";
+<br>-- os arquivos .bin e .tpl da pasta "r204_04";
 
 <br> Ao fazer o repack será gerado os arquivos:
-* r204_04.SMD (esse é o arquivo para ser colocado no .udas);
+<br>-- r204_04.SMD (esse é o arquivo para ser colocado no .udas);
 
 <br> Nota: esse é o método antigo, no qual se edita os bin individualmente, porem o repack com .idxuhdscenario cria novos bin modificados, e um novo .idxuhdsmd, no qual pode ser usado para fazer esse repack; essa opção é para caso você queira colocar um .bin no .smd que o programa não consiga criar.
 
@@ -112,7 +117,7 @@ Veja sobre em [RE4-UHD-BIN-TOOL](https://github.com/JADERLINK/RE4-UHD-BIN-TOOL);
 
 # sobre .r100extract e r100extract
 Para extrair o cenário coloque os arquivos .Smd necessários ao lado de .r100extract;
-<br> Nota: estarei fazendo um tutorial detalhado de como usar a tool e editar o r100;
+<br> Nota: no topico **tutorial** tem um tutorial sobre como editar o r100;
 
 ## Código de terceiro:
 
@@ -120,4 +125,4 @@ Para extrair o cenário coloque os arquivos .Smd necessários ao lado de .r100ex
 Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL, código modificado, as modificações podem ser vistas aqui: [link](https://github.com/JADERLINK/ObjLoader).
 
 **At.te: JADERLINK**
-<br>2023-11-26
+<br>2023-11-27
