@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using ObjLoader.Loader.Loaders;
 using RE4_UHD_BIN_TOOL.REPACK.Structures;
 using RE4_UHD_BIN_TOOL.REPACK;
 
@@ -14,6 +13,9 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
     {
         public static void RepackOBJ(Stream objFile, ref IdxUhdScenario idxScenario, out Dictionary<int, SmdBaseLine> objGroupInfos, out Dictionary<int, FinalStructure> FinalBinList)
         {
+            string patternUHDSCENARIO = "^(UHDSCENARIO#SMD_)([0]{0,})([0-9]{1,3})(#SMX_)([0]{0,})([0-9]{1,3})(#TYPE_)([0]{0,})([0-9|A-F]{1,8})(#BIN_)([0]{0,})([0-9]{1,3})(#).*$";
+            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(patternUHDSCENARIO, System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
             bool LoadColorsFromObjFile = true;
 
             // load .obj file
@@ -46,7 +48,27 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
                 if (GroupName.StartsWith("UHDSCENARIO"))
                 {
-                    Console.WriteLine("Loading in Obj: " + GroupName);
+                    string materialNameInvariant = arqObj.Groups[iG].MaterialName.ToUpperInvariant().Trim();
+                    string materialName = arqObj.Groups[iG].MaterialName.Trim();
+
+                    //FIX NAME
+                    GroupName = GroupName.Replace("_", "#")
+                        .Replace("SMD#", "SMD_")
+                        .Replace("SMX#", "SMX_")
+                        .Replace("TYPE#", "TYPE_")
+                        .Replace("BIN#", "BIN_")
+                        ;
+
+                    //REGEX
+                    if (regex.IsMatch(GroupName))
+                    {
+                        Console.WriteLine("Loading in Obj: " + GroupName + " | " + materialNameInvariant);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Loading in Obj: " + GroupName + " | " + materialNameInvariant + "  The group name is wrong;");
+                    }
+
 
                     SmdBaseLine info = getGroupInfo(GroupName);
 
@@ -152,9 +174,6 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     }
 
 
-                    string materialNameInvariant = arqObj.Groups[iG].MaterialName.ToUpperInvariant().Trim();
-                    string materialName = arqObj.Groups[iG].MaterialName.Trim();
-
                     if (ObjList.ContainsKey(info.SmdId))
                     {
                         if (ObjList[info.SmdId].FacesByMaterial.ContainsKey(materialNameInvariant))
@@ -178,6 +197,11 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     }
 
                 }
+                else
+                {
+                    Console.WriteLine("Loading in Obj: " + GroupName + "   Warning: Group not used;");
+                }
+
             }
 
 

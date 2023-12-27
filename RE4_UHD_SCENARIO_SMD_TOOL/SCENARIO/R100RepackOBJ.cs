@@ -17,6 +17,10 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             out Dictionary<int, Dictionary<int, FinalStructure>> FinalBinListDic,
             out int[] maxBin)
         {
+            string patternR100 = "^(FILE_)([0]{0,})([0-6]{1})(#SMD_)([0]{0,})([0-9]{1,3})(#SMX_)([0]{0,})([0-9]{1,3})(#TYPE_)([0]{0,})([0-9|A-F]{1,8})(#BIN_)([0]{0,})([0-9]{1,3})(#).*$";
+            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(patternR100, System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+
             bool LoadColorsFromObjFile = true;
 
             // load .obj file
@@ -58,9 +62,29 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             {
                 string GroupName = arqObj.Groups[iG].GroupName.ToUpperInvariant().Trim();
 
-                if (GroupName.StartsWith("#FILE") || GroupName.StartsWith("FILE"))
+                if (GroupName.StartsWith("FILE"))
                 {
-                    Console.WriteLine("Loading in Obj: " + GroupName);
+                    string materialNameInvariant = arqObj.Groups[iG].MaterialName.ToUpperInvariant().Trim();
+                    string materialName = arqObj.Groups[iG].MaterialName.Trim();
+
+                    //FIX NAME
+                    GroupName = GroupName.Replace("_", "#")
+                        .Replace("FILE#", "FILE_")
+                        .Replace("SMD#", "SMD_")
+                        .Replace("SMX#", "SMX_")
+                        .Replace("TYPE#", "TYPE_")
+                        .Replace("BIN#", "BIN_")
+                        ;
+
+                    //REGEX
+                    if (regex.IsMatch(GroupName))
+                    {
+                        Console.WriteLine("Loading in Obj: " + GroupName + " | " + materialNameInvariant);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Loading in Obj: " + GroupName + " | " + materialNameInvariant + "  The group name is wrong;");
+                    }
 
                     int fileID = 0;
 
@@ -171,9 +195,6 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     }
 
 
-                    string materialNameInvariant = arqObj.Groups[iG].MaterialName.ToUpperInvariant().Trim();
-                    string materialName = arqObj.Groups[iG].MaterialName.Trim();
-
                     bool type = (info.Type & 0x10) == 0x10;
                     var key = (fileID, type);
                     if (!ObjListDic.ContainsKey(key))
@@ -205,6 +226,11 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     }
 
                 }
+                else
+                {
+                    Console.WriteLine("Loading in Obj: " + GroupName + "   Warning: Group not used;");
+                }
+
             }
 
 

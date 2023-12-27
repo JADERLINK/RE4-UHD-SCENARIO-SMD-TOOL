@@ -10,6 +10,13 @@ Veja abaixo tutoriais em português de como usar a tool:
 <br>[RE4 UHD Tutorial Editando Scenarios SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-SCENARIO-SMD.html)
 <br>[RE4 UHD Tutorial Editando r100.SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-R100-SMD.html)
 
+
+## Update B.1.0.0.2
+
+Adicionado compatibilidade com outros editores 3D que não suportam caracteres especiais #: como, por exemplo, o 3dsMax;
+<br> Adicionado também uma verificação no nome dos grupos, então caso esteja errado o nome, o programa avisa-rá;
+<br> Os arquivos da versão anterior são compatíveis com essa versão;
+
 ## Update B.1.0.0.1
 
 * Adicionado suporte para o **R100**, agora você pode extrair esse cenario dividido em 7 SMD, em um único arquivo .obj, use "R100.r100extract"; (Veja mais formações mais abaixo);
@@ -86,6 +93,14 @@ Sendo:
 * BIN_000 esse é o id do bin que será usado, para bin repetidos, será considerado somente o primeiro, (o próximo com o mesmo id, será usado o mesmo modelo que do primeiro).
 * o nome do grupo deve terminar com # (pois depois de salvo o arquivo, o blender coloca mais texto no final do nome do grupo)
 
+<br> ----> No Update B.1.0.0.2, o nome dos objetos/grupos também pode ser:
+<br> UHDSCENARIO\_SMD\_000\_SMX\_000\_TYPE\_08\_BIN\_000\_
+<br> UHDSCENARIO\_SMD\_001\_SMX\_001\_TYPE\_08\_BIN\_001\_
+
+<br> ----> Sobre verificações de grupos:
+<br> * No Repack se ao lado direito do nome do grupo aparecer o texto "The group name is wrong;", significa que o nome do grupo está errado, e o seu arquivo SMD vai ficar errado;
+<br> * E se ao lado direito aparecer "Warning: Group not used;" esse grupo esta sendo ignorado pelo meu programa, caso, na verdade, você gostaria de usá-lo, você deve arrumar o nome do grupo;
+
 
 **Editando o arquivo .obj no Blender**
 <br>No importador de .obj marque a caixa "Split By Group" que esta no lado direto da tela.
@@ -125,4 +140,4 @@ Para extrair o cenário coloque os arquivos .Smd necessários ao lado de .r100ex
 Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL, código modificado, as modificações podem ser vistas aqui: [link](https://github.com/JADERLINK/ObjLoader).
 
 **At.te: JADERLINK**
-<br>2023-11-27
+<br>2023-12-27
