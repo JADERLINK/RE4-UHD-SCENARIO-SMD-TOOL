@@ -55,10 +55,10 @@ namespace RE4_UHD_BIN_TOOL.REPACK
                 else if (count == 4) //vai virar guad
                 {
                     List<IntermediaryVertex> reordered = new List<IntermediaryVertex>();
-                    reordered.Add(intermediaryMesh.Faces[i].Vertexs[3]);
                     reordered.Add(intermediaryMesh.Faces[i].Vertexs[2]);
                     reordered.Add(intermediaryMesh.Faces[i].Vertexs[0]);
                     reordered.Add(intermediaryMesh.Faces[i].Vertexs[1]);
+                    reordered.Add(intermediaryMesh.Faces[i].Vertexs[3]);
 
                     var res = (from obj in mesh.Faces
                                where obj.Type == CONSTs.FACE_TYPE_QUAD_LIST && obj.Count < short.MaxValue
