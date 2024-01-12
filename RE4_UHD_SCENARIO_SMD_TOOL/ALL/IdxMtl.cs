@@ -148,6 +148,12 @@ namespace RE4_UHD_BIN_TOOL.ALL
 
         public TexPathRef(string texturePath) 
         {
+            Format = "";
+            if (texturePath == null)
+            {
+                texturePath = "";
+            }
+
             texturePath = texturePath.Replace("\\", "/");
             var split = texturePath.Split('/').Where(s => s.Length != 0).ToArray();
 
