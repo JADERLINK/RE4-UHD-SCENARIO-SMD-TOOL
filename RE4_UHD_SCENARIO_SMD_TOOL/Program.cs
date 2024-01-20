@@ -9,7 +9,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
 {
     class Program
     {
-        public const string VERSION = "B.1.0.0.4 (2024-01-12)";
+        public const string VERSION = "B.1.0.0.5 (2024-01-20)";
 
         public static string headerText()
         {

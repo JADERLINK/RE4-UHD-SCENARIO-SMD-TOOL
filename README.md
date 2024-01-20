@@ -10,6 +10,9 @@ Veja abaixo tutoriais em português de como usar a tool:
 <br>[RE4 UHD Tutorial Editando Scenarios SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-SCENARIO-SMD.html)
 <br>[RE4 UHD Tutorial Editando r100.SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-R100-SMD.html)
 
+## Update: B.1.0.0.5
+Corrigido bug no qual o arquivo MTL com PACK_ID com IDs que continham letras, as letras não eram consideradas.
+
 ## Update: B.1.0.0.4
 Corrido erro, ao ter material sem a textura principal "map_Kd", será preenchido como Pack ID00000000 e texture ID 000;
 <br> Agora, caso a quantidade de vértices for superior ao limite do arquivo, o programa vai avisar. (Não será criado o arquivo SMD);
@@ -79,13 +82,14 @@ Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Repack all with idxuhdsmd.bat"
 <br> que vai requisitar os arquivos:
 <br>-- os arquivos .bin e .tpl da pasta "r204_04";
 
-<br> Ao fazer o repack será gerado os arquivos:
+Ao fazer o repack será gerado os arquivos:
 <br>-- r204_04.SMD (esse é o arquivo para ser colocado no .udas);
 
-<br> Nota: esse é o método antigo, no qual se edita os bin individualmente, porem o repack com .idxuhdscenario cria novos bin modificados, e um novo .idxuhdsmd, no qual pode ser usado para fazer esse repack; essa opção é para caso você queira colocar um .bin no .smd que o programa não consiga criar.
+Nota: esse é o método antigo, no qual se edita os bin individualmente, porem o repack com .idxuhdscenario cria novos bin modificados, e um novo .idxuhdsmd, no qual pode ser usado para fazer esse repack; essa opção é para caso você queira colocar um .bin no .smd que o programa não consiga criar.
 
 ## Sobre r204_04.scenario.obj
-<br>Esse arquivo é onde está todo o cenário, nele os arquivos BIN são separados por grupos, no qual é nomenclatura deve ser respeitada:
+
+Esse arquivo é onde está todo o cenário, nele os arquivos BIN são separados por grupos, no qual é nomenclatura deve ser respeitada:
 <br> Exemplo:
 <br> UHDSCENARIO#SMD_000#SMX_000#TYPE_08#BIN_000#
 <br> UHDSCENARIO#SMD_001#SMX_001#TYPE_08#BIN_001#
@@ -99,11 +103,11 @@ Sendo:
 * BIN_000 esse é o id do bin que será usado, para bin repetidos, será considerado somente o primeiro, (o próximo com o mesmo id, será usado o mesmo modelo que do primeiro).
 * o nome do grupo deve terminar com # (pois depois de salvo o arquivo, o blender coloca mais texto no final do nome do grupo)
 
-<br> ----> No Update B.1.0.0.2, o nome dos objetos/grupos também pode ser:
+----> No Update B.1.0.0.2, o nome dos objetos/grupos também pode ser:
 <br> UHDSCENARIO\_SMD\_000\_SMX\_000\_TYPE\_08\_BIN\_000\_
 <br> UHDSCENARIO\_SMD\_001\_SMX\_001\_TYPE\_08\_BIN\_001\_
 
-<br> ----> Sobre verificações de grupos:
+----> Sobre verificações de grupos:
 <br> * No Repack se ao lado direito do nome do grupo aparecer o texto "The group name is wrong;", significa que o nome do grupo está errado, e o seu arquivo SMD vai ficar errado;
 <br> * E se ao lado direito aparecer "Warning: Group not used;" esse grupo esta sendo ignorado pelo meu programa, caso, na verdade, você gostaria de usá-lo, você deve arrumar o nome do grupo;
 
@@ -119,7 +123,7 @@ Sendo:
 <br> no arquivo .obj o nome dos grupos vão ficar com "_Mesh" no final do nome (por isso no editor termina o nome do grupo com # para evitar problemas)
 
 ## Sobre .idxuhdscenario / .idxuhdsmd
-<br>Segue a baixo a lista de comando mais importantes presente no arquivo:
+Segue a baixo a lista de comando mais importantes presente no arquivo:
 
 * SmdAmount:106 // representa a quantidade de Entry/Line no .Smd (você pode mudar, mas em alguns cenário pode esta crashando o jogo)
 * SmdFileName:r204_04.SMD // esse é o nome do arquivo Smd que será gerado
@@ -146,4 +150,4 @@ Para extrair o cenário coloque os arquivos .Smd necessários ao lado de .r100ex
 Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL, código modificado, as modificações podem ser vistas aqui: [link](https://github.com/JADERLINK/ObjLoader).
 
 **At.te: JADERLINK**
-<br>2024-01-05
+<br>2024-01-20

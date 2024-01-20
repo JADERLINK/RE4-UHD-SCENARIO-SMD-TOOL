@@ -22,7 +22,7 @@ namespace RE4_UHD_BIN_TOOL.ALL
     /// <summary>
     /// representa um material do .mtl
     /// </summary>
-    public class MtlObj 
+    public class MtlObj
     {
         /*
         // ambient color
@@ -126,13 +126,13 @@ namespace RE4_UHD_BIN_TOOL.ALL
     /// <summary>
     /// é usado para definir o caminho das texturas no mtl
     /// </summary>
-    public class TexPathRef 
+    public class TexPathRef
     {
         public uint PackID { get; private set; }
         public uint TextureID { get; private set; }
         public string Format { get; private set; }
 
-        public TexPathRef(uint PackID, uint TextureID, uint FormatType) 
+        public TexPathRef(uint PackID, uint TextureID, uint FormatType)
         {
             this.PackID = PackID;
             this.TextureID = TextureID;
@@ -143,31 +143,31 @@ namespace RE4_UHD_BIN_TOOL.ALL
         {
             this.PackID = PackID;
             this.TextureID = TextureID;
-            this.Format = ImageFormat;
+            this.Format = ImageFormat.ToLowerInvariant();
         }
 
-        public TexPathRef(string texturePath) 
+        public TexPathRef(string texturePath)
         {
-            Format = "";
+            Format = "null";
             if (texturePath == null)
             {
                 texturePath = "";
             }
 
-            texturePath = texturePath.Replace("\\", "/");
+            texturePath = texturePath.Replace("\\", "/").ToUpperInvariant();
             var split = texturePath.Split('/').Where(s => s.Length != 0).ToArray();
 
             try
             {
                 var last = split.Last().Split('.').Where(s => s.Length != 0).ToArray();
                 TextureID = uint.Parse(Utils.ReturnValidDecValue(last[0]), NumberStyles.Integer, CultureInfo.InvariantCulture);
-                Format = last.Last();
+                Format = last.Last().ToLowerInvariant();
             }
             catch (Exception)
             {
             }
 
-            if (split.Length -1 > 0)
+            if (split.Length - 1 > 0)
             {
                 try
                 {
@@ -184,8 +184,8 @@ namespace RE4_UHD_BIN_TOOL.ALL
         {
             return GetPath();
         }
-        
-        public string GetPath() 
+
+        public string GetPath()
         {
             return PackID.ToString("x8") + "/" + TextureID.ToString("D4") + "." + Format;
         }
@@ -208,7 +208,7 @@ namespace RE4_UHD_BIN_TOOL.ALL
         }
     }
 
-    public class KsClass 
+    public class KsClass
     {
         private byte r, g, b;
 
@@ -233,12 +233,12 @@ namespace RE4_UHD_BIN_TOOL.ALL
 
         public string GetKs()
         {
-           return (r / 255f).ToString("f6", CultureInfo.InvariantCulture)
-          + " " + (g / 255f).ToString("f6", CultureInfo.InvariantCulture)
-          + " " + (b / 255f).ToString("f6", CultureInfo.InvariantCulture);
+            return (r / 255f).ToString("f6", CultureInfo.InvariantCulture)
+           + " " + (g / 255f).ToString("f6", CultureInfo.InvariantCulture)
+           + " " + (b / 255f).ToString("f6", CultureInfo.InvariantCulture);
         }
 
-        public byte GetR() 
+        public byte GetR()
         {
             return r;
         }
