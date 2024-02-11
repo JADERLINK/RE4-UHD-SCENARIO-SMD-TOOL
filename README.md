@@ -10,6 +10,11 @@ Veja abaixo tutoriais em português de como usar a tool:
 <br>[RE4 UHD Tutorial Editando Scenarios SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-SCENARIO-SMD.html)
 <br>[RE4 UHD Tutorial Editando r100.SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-R100-SMD.html)
 
+## Update: B.1.0.0.6
+Corrigido bug no qual não era rotacionado as normals dos modelos que têm rotação,
+então, caso esteja usando um .obj de versões anteriores, recalcule as normals;
+<br>Corrigido um bug que, ao extrair as cores de vértices, estava sendo colocado de maneira errada no arquivo obj;
+
 ## Update: B.1.0.0.5
 Corrigido bug no qual o arquivo MTL com PACK_ID com IDs que continham letras, as letras não eram consideradas.
 
@@ -21,13 +26,11 @@ Corrido erro, ao ter material sem a textura principal "map_Kd", será preenchido
 Corrigido bug que deformava a malha do modelo 3d, estava sendo criado faces do tipo "quad" de maneira errada; 
 
 ## Update B.1.0.0.2
-
 Adicionado compatibilidade com outros editores 3D que não suportam caracteres especiais #: como, por exemplo, o 3dsMax;
 <br> Adicionado também uma verificação no nome dos grupos, então caso esteja errado o nome, o programa avisa-rá;
 <br> Os arquivos da versão anterior são compatíveis com essa versão;
 
 ## Update B.1.0.0.1
-
 * Adicionado suporte para o **R100**, agora você pode extrair esse cenario dividido em 7 SMD, em um único arquivo .obj, use "R100.r100extract"; (Veja mais formações mais abaixo);
 * Adicionado verificação do "magic" do arquivo .Smd;
 * Nos arquivos ".idxuhdscenario" e ".idxuhdsmd" adicionados os campos "Magic" e "ExtraParameterAmount", no qual só vão aparecer caso forem usados.
@@ -150,4 +153,4 @@ Para extrair o cenário coloque os arquivos .Smd necessários ao lado de .r100ex
 Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL, código modificado, as modificações podem ser vistas aqui: [link](https://github.com/JADERLINK/ObjLoader).
 
 **At.te: JADERLINK**
-<br>2024-01-20
+<br>2024-02-11

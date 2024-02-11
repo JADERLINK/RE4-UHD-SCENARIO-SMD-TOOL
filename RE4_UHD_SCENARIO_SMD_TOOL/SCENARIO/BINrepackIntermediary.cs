@@ -45,10 +45,18 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                         vertex.PosY = pos1[1];
                         vertex.PosZ = pos1[2];
 
+                        float[] normal1 = new float[3];// 0 = x, 1 = y, 2 = z
+                        normal1[0] = item.Value.Faces[i][iv].Normal.X;
+                        normal1[1] = item.Value.Faces[i][iv].Normal.Y;
+                        normal1[2] = item.Value.Faces[i][iv].Normal.Z;
 
-                        vertex.NormalX = item.Value.Faces[i][iv].Normal.X * NORMAL_FIX;
-                        vertex.NormalY = item.Value.Faces[i][iv].Normal.Y * NORMAL_FIX;
-                        vertex.NormalZ = item.Value.Faces[i][iv].Normal.Z * NORMAL_FIX;
+                        normal1 = RotationUtils.RotationInZ(normal1, -smdLine.angleZ);
+                        normal1 = RotationUtils.RotationInY(normal1, -smdLine.angleY);
+                        normal1 = RotationUtils.RotationInX(normal1, -smdLine.angleX);
+
+                        vertex.NormalX = normal1[0] * NORMAL_FIX;
+                        vertex.NormalY = normal1[1] * NORMAL_FIX;
+                        vertex.NormalZ = normal1[2] * NORMAL_FIX;
 
                         vertex.TextureU = item.Value.Faces[i][iv].Texture.U;
                         vertex.TextureV = item.Value.Faces[i][iv].Texture.V;

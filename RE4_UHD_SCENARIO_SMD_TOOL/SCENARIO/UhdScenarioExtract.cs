@@ -97,10 +97,15 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
                 if (UseColorsInObjFile && uhdbin.Header.ReturnsIsEnableVertexColors() && uhdbin.Vertex_Color_Array.Length > i)
                 {
-                    v += " " + (uhdbin.Vertex_Color_Array[i].r).ToString("F9", inv)
-                       + " " + (uhdbin.Vertex_Color_Array[i].g).ToString("F9", inv)
-                       + " " + (uhdbin.Vertex_Color_Array[i].b).ToString("F9", inv)
-                       + " " + (uhdbin.Vertex_Color_Array[i].a).ToString("F9", inv);
+                    float r = uhdbin.Vertex_Color_Array[i].r / 255f;
+                    float g = uhdbin.Vertex_Color_Array[i].g / 255f;
+                    float b = uhdbin.Vertex_Color_Array[i].b / 255f;
+                    float a = uhdbin.Vertex_Color_Array[i].a / 255f;
+
+                    v += " " + (r).ToString("F9", inv)
+                       + " " + (g).ToString("F9", inv)
+                       + " " + (b).ToString("F9", inv)
+                       + " " + (a).ToString("F9", inv);
                 }
                 obj.WriteLine(v);
 
@@ -108,10 +113,19 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
             for (int i = 0; i < uhdbin.Vertex_Normal_Array.Length; i++)
             {
-                float nx = uhdbin.Vertex_Normal_Array[i].nx / NORMAL_FIX;
-                float ny = uhdbin.Vertex_Normal_Array[i].ny / NORMAL_FIX;
-                float nz = uhdbin.Vertex_Normal_Array[i].nz / NORMAL_FIX;
-                obj.WriteLine("vn " + nx.ToString("F9", inv) + " " + ny.ToString("F9", inv) + " " + nz.ToString("F9", inv));
+                float[] normal = new float[3];// 0 = x, 1 = y, 2 = z
+                normal[0] = uhdbin.Vertex_Normal_Array[i].nx / NORMAL_FIX;
+                normal[1] = uhdbin.Vertex_Normal_Array[i].ny / NORMAL_FIX;
+                normal[2] = uhdbin.Vertex_Normal_Array[i].nz / NORMAL_FIX;
+
+                normal = RotationUtils.RotationInX(normal, smdLine.angleX);
+                normal = RotationUtils.RotationInY(normal, smdLine.angleY);
+                normal = RotationUtils.RotationInZ(normal, smdLine.angleZ);
+
+                obj.WriteLine("vn " + 
+                    (normal[0]).ToString("F9", inv) + " " +
+                    (normal[1]).ToString("F9", inv) + " " +
+                    (normal[2]).ToString("F9", inv));
             }
 
             for (int i = 0; i < uhdbin.Vertex_UV_Array.Length; i++)
