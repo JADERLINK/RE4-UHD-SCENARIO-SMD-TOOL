@@ -260,11 +260,11 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
                     if (final.Vertex_Position_Array.Length > ushort.MaxValue)
                     {
-                        Console.WriteLine("Error: Number of vertices greater than the limit: " + final.Vertex_Position_Array.Length);
-                        Console.WriteLine("The limit is: " + ushort.MaxValue);
-                        Console.WriteLine("BIN ID: " + BinID.ToString("D3"));
-                        Console.WriteLine("SMD ID: " + item.Key.ToString("D3"));
-                        throw new ArgumentOutOfRangeException("SMD file not created, the number of vertices in the BIN file is greater than allowed.");
+                        Console.WriteLine("Warning: Number of vertices greater than the limit: " + final.Vertex_Position_Array.Length);
+                        Console.WriteLine("The limit is: " + ushort.MaxValue + 
+                            "; BIN ID: " + BinID.ToString("D3") +
+                            "; SMD ID: " + item.Key.ToString("D3") + ";");
+                        Console.WriteLine("Use above the vertex limit is permitted, but use with caution;");
                     }
                 }
             }

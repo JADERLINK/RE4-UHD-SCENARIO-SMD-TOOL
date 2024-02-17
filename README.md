@@ -10,6 +10,12 @@ Veja abaixo tutoriais em português de como usar a tool:
 <br>[RE4 UHD Tutorial Editando Scenarios SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-SCENARIO-SMD.html)
 <br>[RE4 UHD Tutorial Editando r100.SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-R100-SMD.html)
 
+## Update: B.1.0.0.7
+Agora o programa é compatível em extrair e criar .SMD com arquivos .BIN acima do limite de vértices;
+<br>Atenção: Os .BIN com vértices acima do limite só funcionam corretamente se eles forem usados dentro de arquivos Scenario .SMD;
+<br>O uso acima do limite do vértice é permitido, mas use com cuidado.
+<br>Em outras situações, o limite ainda é valido;
+
 ## Update: B.1.0.0.6
 Corrigido bug no qual não era rotacionado as normals dos modelos que têm rotação,
 então, caso esteja usando um .obj de versões anteriores, recalcule as normals;

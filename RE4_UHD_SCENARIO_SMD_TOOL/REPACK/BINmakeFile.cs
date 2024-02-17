@@ -154,7 +154,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
         private static byte[] MakeVertexColors((byte a, byte r, byte g, byte b)[] Vertex_Color_Array) 
         {
             
-            byte[] b = new byte[CalculateBytesVertexColor((ushort)Vertex_Color_Array.Length)];
+            byte[] b = new byte[CalculateBytesVertexColor((uint)Vertex_Color_Array.Length)];
 
             int tempOffset = 0;
             for (int i = 0; i < Vertex_Color_Array.Length; i++)
@@ -173,7 +173,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
 
         private static byte[] MakeVertexTexcoordUV((float tu, float tv)[] Vertex_UV_Array) 
         {
-            byte[] b = new byte[CalculateBytesVertexTexcoordUV((ushort)Vertex_UV_Array.Length)];
+            byte[] b = new byte[CalculateBytesVertexTexcoordUV((uint)Vertex_UV_Array.Length)];
 
             int tempOffset = 0;
             for (int i = 0; i < Vertex_UV_Array.Length; i++)
@@ -189,7 +189,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
 
         private static byte[] MakeVertexWeightIndex(ushort[] WeightIndex)
         {
-            byte[] b = new byte[CalculateBytesVertexWeightIndex((ushort)WeightIndex.Length)];
+            byte[] b = new byte[CalculateBytesVertexWeightIndex((uint)WeightIndex.Length)];
 
             int tempOffset = 0;
             for (int i = 0; i < WeightIndex.Length; i++)
@@ -202,7 +202,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
 
         private static byte[] MakeVertexPositionNormal((float x, float y, float z)[] Vertex_Array) 
         {
-            byte[] b = new byte[CalculateBytesVertexPositonNormal((ushort)Vertex_Array.Length)];
+            byte[] b = new byte[CalculateBytesVertexPositonNormal((uint)Vertex_Array.Length)];
 
             int tempOffset = 0;
             for (int i = 0; i < Vertex_Array.Length; i++)
@@ -217,7 +217,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
 
         private static byte[] MakeWeightMap(FinalWeightMap[] WeightMaps) 
         {
-            byte[] b = new byte[CalculateBytesVertexWeightMap((ushort)WeightMaps.Length)];
+            byte[] b = new byte[CalculateBytesVertexWeightMap((uint)WeightMaps.Length)];
 
             int tempOffset = 0;
             for (int i = 0; i < WeightMaps.Length; i++)
@@ -267,7 +267,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
 
         private static byte[] MakeBonepair(byte[][] bonepairLines) 
         {
-            byte[] b = new byte[CalculateBytesBonePairAmount((ushort)bonepairLines.Length)];
+            byte[] b = new byte[CalculateBytesBonePairAmount((uint)bonepairLines.Length)];
             BitConverter.GetBytes(bonepairLines.Length).CopyTo(b, 0);
 
             int offset = 4;
@@ -305,7 +305,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
             if (finalStructure.WeightMaps != null && finalStructure.WeightMaps.Length != 0 && UseWeightMap)
             {
                 WeightMapOffset = tempOffset;
-                tempOffset += (uint)CalculateBytesVertexWeightMap((ushort)finalStructure.WeightMaps.Length);
+                tempOffset += (uint)CalculateBytesVertexWeightMap((uint)finalStructure.WeightMaps.Length);
             }
 
 
@@ -313,12 +313,12 @@ namespace RE4_UHD_BIN_TOOL.REPACK
             if (BonePairAmount != 0)
             {
                 BonePairOffset = tempOffset;
-                tempOffset += (uint)CalculateBytesBonePairAmount((ushort)BonePairAmount);
+                tempOffset += (uint)CalculateBytesBonePairAmount((uint)BonePairAmount);
             }
 
             //vertexPosition
             VertexPositionOffset = tempOffset;
-            tempOffset += (uint)CalculateBytesVertexPositonNormal((ushort)finalStructure.Vertex_Position_Array.Length);
+            tempOffset += (uint)CalculateBytesVertexPositonNormal((uint)finalStructure.Vertex_Position_Array.Length);
 
 
             if (finalStructure.WeightIndex != null && finalStructure.WeightIndex.Length != 0 && UseWeightMap)
@@ -326,22 +326,22 @@ namespace RE4_UHD_BIN_TOOL.REPACK
                 VertexWeightIndexOffset = tempOffset;
                 VertexWeight2IndexOffset = tempOffset;
 
-                tempOffset += (uint)CalculateBytesVertexWeightIndex((ushort)finalStructure.WeightIndex.Length);
+                tempOffset += (uint)CalculateBytesVertexWeightIndex((uint)finalStructure.WeightIndex.Length);
             }
 
             //vertexNormal
             VertexNormalOffset = tempOffset;
-            tempOffset += (uint)CalculateBytesVertexPositonNormal((ushort)finalStructure.Vertex_Normal_Array.Length);
+            tempOffset += (uint)CalculateBytesVertexPositonNormal((uint)finalStructure.Vertex_Normal_Array.Length);
 
             if (UseColors)
             {
                 VertexColorsOffset = tempOffset;
-                tempOffset += (uint)CalculateBytesVertexColor((ushort)finalStructure.Vertex_Color_Array.Length);
+                tempOffset += (uint)CalculateBytesVertexColor((uint)finalStructure.Vertex_Color_Array.Length);
             }
 
             //VertexTexcoord
             VertexTexcoordOffset = tempOffset;
-            tempOffset += (uint)CalculateBytesVertexTexcoordUV((ushort)finalStructure.Vertex_UV_Array.Length);
+            tempOffset += (uint)CalculateBytesVertexTexcoordUV((uint)finalStructure.Vertex_UV_Array.Length);
 
 
             //material
@@ -363,6 +363,12 @@ namespace RE4_UHD_BIN_TOOL.REPACK
             {
                 header.weight_count = (byte)finalStructure.WeightMaps.Length;
                 header.weight2_count = (ushort)finalStructure.WeightMaps.Length; //--same as weightcount
+
+                if (finalStructure.WeightMaps.Length > ushort.MaxValue)
+                {
+                    header.weight_count = byte.MaxValue;
+                    header.weight2_count = ushort.MaxValue;
+                }
             }
             else 
             {
@@ -399,7 +405,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
                 header.version_flags = 0x20010801;
             }
 
-
+            //------------
             header.texture2_flags = 0x8000;
 
             if (UseExtendedNormals)
@@ -411,7 +417,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
             {
                 header.texture2_flags |= 0x4000;
             }
-
+            //----------
 
             header.TPL_count = 0; // afazer
             header.vertex_scale = 0; // afazer
@@ -422,10 +428,28 @@ namespace RE4_UHD_BIN_TOOL.REPACK
 
             header.vertex_position_offset = VertexPositionOffset;
             header.vertex_normal_offset = VertexNormalOffset;
-            header.vertex_position_count = (ushort)finalStructure.Vertex_Position_Array.Length;
-            header.vertex_normal_count = (ushort)finalStructure.Vertex_Normal_Array.Length;
-           
 
+            //---
+            uint Vertex_Position_Count = (uint)finalStructure.Vertex_Position_Array.Length;
+            if (Vertex_Position_Count < ushort.MaxValue)
+            {
+                header.vertex_position_count = (ushort)Vertex_Position_Count;
+            }
+            else 
+            {
+                header.vertex_position_count = ushort.MaxValue;
+            }
+            
+            uint Vertex_Normal_Count = (uint)finalStructure.Vertex_Normal_Array.Length;
+            if (Vertex_Normal_Count < ushort.MaxValue)
+            {
+                header.vertex_normal_count = (ushort)Vertex_Normal_Count;
+            }
+            else
+            {
+                header.vertex_normal_count = ushort.MaxValue;
+            }
+            //----
 
             header.bonepair_offset = BonePairOffset;
             header.adjacent_offset = AdjacentBoneOffset;
@@ -481,31 +505,31 @@ namespace RE4_UHD_BIN_TOOL.REPACK
 
         // calcula quantidade de bytes usado por BonePair
         //BonePairAmount
-        private static int CalculateBytesBonePairAmount(ushort count)
+        private static uint CalculateBytesBonePairAmount(uint count)
         {
-            int calc = 4 + (count * 8);
+            uint calc = 4 + (count * 8);
 
-            int div = calc / 16;
-            int rest = calc % 16;
+            uint div = calc / 16;
+            uint rest = calc % 16;
             if (rest != 0)
             {
                 div++;
             }
-            int response = div * 16;
+            uint response = div * 16;
             return response;
         }
 
 
         // calcula a quantidade de bytes usado por weight map
-        private static int CalculateBytesVertexWeightMap(ushort count)
+        private static uint CalculateBytesVertexWeightMap(uint count)
         {
-            int response = 0;
+            uint response = 0;
             if (count > 255)
             {
-                int calc = count * 12;
+                uint calc = count * 12;
 
-                int div = calc / 16;
-                int rest = calc % 16;
+                uint div = calc / 16;
+                uint rest = calc % 16;
                 if (rest != 0)
                 {
                     div++;
@@ -514,10 +538,10 @@ namespace RE4_UHD_BIN_TOOL.REPACK
             }
             else if (count != 0)
             {
-                int calc = count * 8;
+                uint calc = count * 8;
 
-                int div = calc / 16;
-                int rest = calc % 16;
+                uint div = calc / 16;
+                uint rest = calc % 16;
                 if (rest != 0)
                 {
                     div++;
@@ -529,62 +553,62 @@ namespace RE4_UHD_BIN_TOOL.REPACK
         }
 
         // calcula a quantidade de bytes usado por weight index
-        private static int CalculateBytesVertexWeightIndex(ushort count)
+        private static uint CalculateBytesVertexWeightIndex(uint count)
         {
-            int calc = count * 2;
+            uint calc = count * 2;
 
-            int div = calc / 16;
-            int rest = calc % 16;
+            uint div = calc / 16;
+            uint rest = calc % 16;
             if (rest != 0)
             {
                 div++;
             }
-            int response = div * 16;
+            uint response = div * 16;
             return response;
         }
 
         // calcula a quantidade de bytes usado por vertex position/normal
-        private static int CalculateBytesVertexPositonNormal(ushort count) 
+        private static uint CalculateBytesVertexPositonNormal(uint count) 
         {
-            int calc = count * 3 * 4;
+            uint calc = count * 3 * 4;
 
-            int div = calc / 16;
-            int rest = calc % 16;
+            uint div = calc / 16;
+            uint rest = calc % 16;
             if (rest != 0)
             {
                 div++;
             }
-            int response = div * 16;
+            uint response = div * 16;
             return response;
         }
 
         //calcula a quantidade de bytes usado por texcoord UV
-        private static int CalculateBytesVertexTexcoordUV(ushort count) 
+        private static uint CalculateBytesVertexTexcoordUV(uint count) 
         {
-            int calc = count * 2 * 4;
+            uint calc = count * 2 * 4;
 
-            int div = calc / 16;
-            int rest = calc % 16;
+            uint div = calc / 16;
+            uint rest = calc % 16;
             if (rest != 0)
             {
                 div++;
             }
-            int response = div * 16;
+            uint response = div * 16;
             return response;
         }
 
         //calcula a quantidade de bytes usado por color
-        private static int CalculateBytesVertexColor(ushort count)
+        private static uint CalculateBytesVertexColor(uint count)
         {
-            int calc = count * 4; //color 1 uint
+            uint calc = count * 4; //color 1 uint
 
-            int div = calc / 16;
-            int rest = calc % 16;
+            uint div = calc / 16;
+            uint rest = calc % 16;
             if (rest != 0)
             {
                 div++;
             }
-            int response = div * 16;
+            uint response = div * 16;
             return response;
         }
     }

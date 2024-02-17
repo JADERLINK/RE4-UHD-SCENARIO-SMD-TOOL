@@ -19,12 +19,21 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
 
             uhdBIN.Header = GetHeader(br);
 
-            uhdBIN.Vertex_Position_Array = Get_Vertex_Position_Array(br, uhdBIN.Header.vertex_position_offset + startOffset, uhdBIN.Header.vertex_position_count);
-            uhdBIN.Vertex_Normal_Array = Get_Vertex_Normal_Array(br, uhdBIN.Header.vertex_normal_offset + startOffset, uhdBIN.Header.vertex_normal_count);
-            uhdBIN.Vertex_UV_Array = Get_Vertex_UV_Array(br, uhdBIN.Header.vertex_texcoord_offset + startOffset, uhdBIN.Header.vertex_position_count);
+            //Quantidade real de vertices/normals, calculado pela montagem de faces
+            int True_Vertex_Count;
+
+            //material
+            uhdBIN.Materials = Materials(br, uhdBIN.Header.material_offset + startOffset, uhdBIN.Header.material_count, out True_Vertex_Count);
+            endOffset = br.BaseStream.Position;
+
+            //--------
+
+            uhdBIN.Vertex_Position_Array = Get_Vertex_Position_Array(br, uhdBIN.Header.vertex_position_offset + startOffset, True_Vertex_Count);
+            uhdBIN.Vertex_Normal_Array = Get_Vertex_Normal_Array(br, uhdBIN.Header.vertex_normal_offset + startOffset, True_Vertex_Count);
+            uhdBIN.Vertex_UV_Array = Get_Vertex_UV_Array(br, uhdBIN.Header.vertex_texcoord_offset + startOffset, True_Vertex_Count);
             if (uhdBIN.Header.vertex_colour_offset != 0)
             {
-                uhdBIN.Vertex_Color_Array = Get_Vertex_Color_Array(br, uhdBIN.Header.vertex_colour_offset + startOffset, uhdBIN.Header.vertex_position_count);
+                uhdBIN.Vertex_Color_Array = Get_Vertex_Color_Array(br, uhdBIN.Header.vertex_colour_offset + startOffset, True_Vertex_Count);
             }
             else 
             {
@@ -34,7 +43,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             uhdBIN.Bones = Get_Bones(br, uhdBIN.Header.bone_offset + startOffset, uhdBIN.Header.bone_count);
 
             //WeightMap
-            if (uhdBIN.Header.weight_offset != 0 && uhdBIN.Header.weight_count > 0 && uhdBIN.Header.weight2_count > 0)
+            if (uhdBIN.Header.weight_offset != 0 && (uhdBIN.Header.weight_count > 0 || uhdBIN.Header.weight2_count > 0))
             {
 
                 if (uhdBIN.Header.weight2_count > 255)
@@ -50,7 +59,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             //WeightIndex
             if (uhdBIN.Header.vertex_weight_index_offset != 0)
             {
-                uhdBIN.WeightIndex = Get_WeightIndex(br, uhdBIN.Header.vertex_weight_index_offset + startOffset, uhdBIN.Header.vertex_position_count);
+                uhdBIN.WeightIndex = Get_WeightIndex(br, uhdBIN.Header.vertex_weight_index_offset + startOffset, True_Vertex_Count);
             }
             else 
             {
@@ -60,7 +69,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             //Weight2Index
             if (uhdBIN.Header.vertex_weight2_index_offset != 0)
             {
-                uhdBIN.Weight2Index = Get_WeightIndex(br, uhdBIN.Header.vertex_weight2_index_offset + startOffset, uhdBIN.Header.vertex_position_count);
+                uhdBIN.Weight2Index = Get_WeightIndex(br, uhdBIN.Header.vertex_weight2_index_offset + startOffset, True_Vertex_Count);
             }
             else
             {
@@ -79,26 +88,26 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
                 uhdBIN.adjacent_bone = Get_adjacent_bone(br, uhdBIN.Header.adjacent_offset + startOffset);
             }
 
-            //material
-            uhdBIN.Materials = Materials(br, uhdBIN.Header.material_offset + startOffset, uhdBIN.Header.material_count);
+            //-----------
 
-            endOffset = br.BaseStream.Position;
+            br.BaseStream.Position = endOffset;
             return uhdBIN;
         }
 
 
-        private static MaterialBin[] Materials(BinaryReader br, long offset, ushort count) 
+        private static MaterialBin[] Materials(BinaryReader br, long offset, ushort MatCount, out int True_Vertex_count) 
         {
-            MaterialBin[] materials = new MaterialBin[count];
+            MaterialBin[] materials = new MaterialBin[MatCount];
             br.BaseStream.Position = offset;
 
             int indexpos = 0;
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < MatCount; i++)
             {
                 materials[i] = Get_Material(br, ref indexpos);
             }
 
+            True_Vertex_count = indexpos;
             return materials;
         }
 
@@ -314,7 +323,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
         }
 
 
-        private static ushort[] Get_WeightIndex(BinaryReader br, long offset, ushort count) 
+        private static ushort[] Get_WeightIndex(BinaryReader br, long offset, int count) 
         {
             ushort[] weightIndex = new ushort[count];
 
@@ -388,7 +397,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
         }
 
 
-        private static (byte a, byte r, byte g, byte b)[] Get_Vertex_Color_Array(BinaryReader br, long offset, ushort count) 
+        private static (byte a, byte r, byte g, byte b)[] Get_Vertex_Color_Array(BinaryReader br, long offset, int count) 
         {
             (byte a, byte r, byte g, byte b)[] colors = new (byte a, byte r, byte g, byte b)[count];
 
@@ -405,7 +414,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             return colors;
         }
 
-        private static (float tu, float tv)[] Get_Vertex_UV_Array(BinaryReader br, long offset, ushort count) 
+        private static (float tu, float tv)[] Get_Vertex_UV_Array(BinaryReader br, long offset, int count) 
         {
             (float tu, float tv)[] uvs = new (float tu, float tv)[count];
 
@@ -421,7 +430,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             return uvs;
         }
 
-        private static (float nx, float ny, float nz)[] Get_Vertex_Normal_Array(BinaryReader br, long offset, ushort count) 
+        private static (float nx, float ny, float nz)[] Get_Vertex_Normal_Array(BinaryReader br, long offset, int count) 
         {
             (float nx, float ny, float nz)[] normals = new (float nx, float ny, float nz)[count];
             
@@ -438,7 +447,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             return normals;
         }
 
-        private static (float vx, float vy, float vz)[] Get_Vertex_Position_Array(BinaryReader br, long offset, ushort count) 
+        private static (float vx, float vy, float vz)[] Get_Vertex_Position_Array(BinaryReader br, long offset, int count) 
         {
             (float vx, float vy, float vz)[] positions = new (float vx, float vy, float vz)[count];
 
