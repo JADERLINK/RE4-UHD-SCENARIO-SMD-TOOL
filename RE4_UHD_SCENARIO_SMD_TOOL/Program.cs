@@ -9,12 +9,13 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
 {
     class Program
     {
-        public const string VERSION = "B.1.0.0.7 (2024-02-17)";
+        public const string VERSION = "B.1.0.0.8 (2024-03-03)";
 
         public static string headerText()
         {
-            return "# RE4_UHD_SCENARIO_SMD_TOOL" + Environment.NewLine +
-                   "# by: JADERLINK" + Environment.NewLine +
+            return "# github.com/JADERLINK/RE4-UHD-SCENARIO-SMD-TOOL" + Environment.NewLine +
+                   "# youtube.com/@JADERLINK" + Environment.NewLine +
+                   "# RE4_UHD_SCENARIO_SMD_TOOL by: JADERLINK" + Environment.NewLine +
                    "# Thanks to \"mariokart64n\" and \"CodeMan02Fr\", " + Environment.NewLine +
                    "# Thanks to \"zatarita\", \"Mr.Curious\", \"Biohazard4X\" and \"kTeo\" for help with the r100 scenario;" + Environment.NewLine +
                    "# Material information by \"Albert\"" + Environment.NewLine +
@@ -29,6 +30,9 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
             {
                 Console.WriteLine("For more information read:");
                 Console.WriteLine("https://github.com/JADERLINK/RE4-UHD-SCENARIO-SMD-TOOL");
+                Console.WriteLine("Press any key to close the console.");
+                Console.ReadKey();
+
             }
             if (args.Length >= 1 && File.Exists(args[0]))
             {

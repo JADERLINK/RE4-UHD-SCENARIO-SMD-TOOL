@@ -10,6 +10,9 @@ Veja abaixo tutoriais em português de como usar a tool:
 <br>[RE4 UHD Tutorial Editando Scenarios SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-SCENARIO-SMD.html)
 <br>[RE4 UHD Tutorial Editando r100.SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-R100-SMD.html)
 
+## Update: B.1.0.0.8
+Arrumado bug ao carregar o arquivo .idxmaterial;
+
 ## Update: B.1.0.0.7
 Agora o programa é compatível em extrair e criar .SMD com arquivos .BIN acima do limite de vértices;
 <br>Atenção: Os .BIN com vértices acima do limite só funcionam corretamente se eles forem usados dentro de arquivos Scenario .SMD;
@@ -65,7 +68,6 @@ Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Extract all scenario SMD.bat"
 ## Repack:
 
 Existem duas maneiras de fazer o repack.
-
 * usando o arquivo .idxuhdscenario, o repack será feito usando o arquivo .obj;
 * usando o arquivo .idxuhdsmd, o repack será feito com os arquivos .bin da pasta "r204_04";
 
@@ -77,7 +79,7 @@ Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Repack all with idxuhdscenario.bat"
 * r204_04.scenario.obj (obrigatório)
 * r204_04.scenario.mtl OU r204_04.scenario.idxmaterial + r204_04.scenario.idxuhdtpl
 
-<br> Ao fazer o repack será gerado os arquivos:
+Ao fazer o repack será gerado os arquivos:
 * r204_04.SMD (esse é o arquivo para ser colocado no .udas);
 * r204_04.scenario.Repack.idxmaterial
 * r204_04.scenario.Repack.idxuhdtpl
