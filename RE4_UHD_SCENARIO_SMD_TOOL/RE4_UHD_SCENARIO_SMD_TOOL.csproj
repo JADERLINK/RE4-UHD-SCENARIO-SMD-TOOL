@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ALL\CONSTs.cs" />
+    <Compile Include="ALL\FloatExtencions.cs" />
     <Compile Include="ALL\IdxMaterial.cs" />
     <Compile Include="ALL\IdxMaterialLoad.cs" />
     <Compile Include="ALL\IdxMaterialParser.cs" />
@@ -71,9 +72,9 @@
     <Compile Include="SCENARIO\R100Repack.cs" />
     <Compile Include="SCENARIO\R100RepackOBJ.cs" />
     <Compile Include="SCENARIO\RotationUtils.cs" />
-    <Compile Include="SCENARIO\ScenarioHeaderExtension.cs" />
     <Compile Include="SCENARIO\SmdBaseLine.cs" />
     <Compile Include="SCENARIO\SmdLineParcer.cs" />
+    <Compile Include="SCENARIO\ToFileMethods.cs" />
     <Compile Include="SCENARIO\UhdScenarioExtract.cs" />
     <Compile Include="SCENARIO\UhdSmdExtract.cs" />
     <Compile Include="REPACK\BINmakeFile.cs" />

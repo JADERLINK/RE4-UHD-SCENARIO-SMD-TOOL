@@ -71,11 +71,6 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
         public static void ObjCreatePart(StreamWriter obj, UhdBIN uhdbin, SMDLine smdLine, Dictionary<MaterialPart, string> materialList, ref uint indexCount, bool UseColorsInObjFile)
         {
-
-            float NORMAL_FIX = uhdbin.Header.ReturnsNormalsFixValue();
-
-            var inv = CultureInfo.InvariantCulture;
-        
             for (int i = 0; i < uhdbin.Vertex_Position_Array.Length; i++)
             {
                 float[] pos = new float[3];// 0 = x, 1 = y, 2 = z
@@ -91,9 +86,9 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                 pos[1] = ((pos[1] * smdLine.scaleY) + (smdLine.positionY)) / CONSTs.GLOBAL_POSITION_SCALE;
                 pos[2] = ((pos[2] * smdLine.scaleZ) + (smdLine.positionZ)) / CONSTs.GLOBAL_POSITION_SCALE;
 
-                string v = "v " + (pos[0]).ToString("F9", inv)
-                          + " " + (pos[1]).ToString("F9", inv)
-                          + " " + (pos[2]).ToString("F9", inv);
+                string v = "v " + (pos[0]).ToFloatString()
+                          + " " + (pos[1]).ToFloatString()
+                          + " " + (pos[2]).ToFloatString();
 
                 if (UseColorsInObjFile && uhdbin.Header.ReturnsIsEnableVertexColors() && uhdbin.Vertex_Color_Array.Length > i)
                 {
@@ -102,10 +97,10 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     float b = uhdbin.Vertex_Color_Array[i].b / 255f;
                     float a = uhdbin.Vertex_Color_Array[i].a / 255f;
 
-                    v += " " + (r).ToString("F9", inv)
-                       + " " + (g).ToString("F9", inv)
-                       + " " + (b).ToString("F9", inv)
-                       + " " + (a).ToString("F9", inv);
+                    v += " " + (r).ToFloatString()
+                       + " " + (g).ToFloatString()
+                       + " " + (b).ToFloatString()
+                       + " " + (a).ToFloatString();
                 }
                 obj.WriteLine(v);
 
@@ -113,26 +108,36 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
             for (int i = 0; i < uhdbin.Vertex_Normal_Array.Length; i++)
             {
+                float nx = uhdbin.Vertex_Normal_Array[i].nx;
+                float ny = uhdbin.Vertex_Normal_Array[i].ny;
+                float nz = uhdbin.Vertex_Normal_Array[i].nz;
+
+                float NORMAL_FIX = (float)Math.Sqrt((nx * nx) + (ny * ny) + (nz * nz));
+                NORMAL_FIX = (NORMAL_FIX == 0) ? 1 : NORMAL_FIX;
+                nx /= NORMAL_FIX;
+                ny /= NORMAL_FIX;
+                nz /= NORMAL_FIX;
+
                 float[] normal = new float[3];// 0 = x, 1 = y, 2 = z
-                normal[0] = uhdbin.Vertex_Normal_Array[i].nx / NORMAL_FIX;
-                normal[1] = uhdbin.Vertex_Normal_Array[i].ny / NORMAL_FIX;
-                normal[2] = uhdbin.Vertex_Normal_Array[i].nz / NORMAL_FIX;
+                normal[0] = nx;
+                normal[1] = ny;
+                normal[2] = nz;
 
                 normal = RotationUtils.RotationInX(normal, smdLine.angleX);
                 normal = RotationUtils.RotationInY(normal, smdLine.angleY);
                 normal = RotationUtils.RotationInZ(normal, smdLine.angleZ);
 
                 obj.WriteLine("vn " + 
-                    (normal[0]).ToString("F9", inv) + " " +
-                    (normal[1]).ToString("F9", inv) + " " +
-                    (normal[2]).ToString("F9", inv));
+                    (normal[0]).ToFloatString() + " " +
+                    (normal[1]).ToFloatString() + " " +
+                    (normal[2]).ToFloatString());
             }
 
             for (int i = 0; i < uhdbin.Vertex_UV_Array.Length; i++)
             {
                 float tu = uhdbin.Vertex_UV_Array[i].tu;
                 float tv = (uhdbin.Vertex_UV_Array[i].tv - 1) * -1;
-                obj.WriteLine("vt " + tu.ToString("F9", inv) + " " + tv.ToString("F9", inv));
+                obj.WriteLine("vt " + tu.ToFloatString() + " " + tv.ToFloatString());
             }
 
 

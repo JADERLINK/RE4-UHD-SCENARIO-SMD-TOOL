@@ -34,6 +34,10 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             return (header.texture1_flags & 0x0200) == 0x0200; // AdjacentBoneTag
         }
 
+        public static bool ReturnsIsEnableVertexColors(this UhdBinHeader header)
+        {
+            return (header.texture2_flags & 0x4000) == 0x4000; // 0x4000 representa qual é o bit ativo para abilitar as vertex colors
+        }
 
     }
 }

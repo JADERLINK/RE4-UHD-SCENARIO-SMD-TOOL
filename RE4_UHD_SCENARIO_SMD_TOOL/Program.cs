@@ -9,7 +9,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
 {
     class Program
     {
-        public const string VERSION = "B.1.0.0.8 (2024-03-03)";
+        public const string VERSION = "B.1.0.09 (2024-03-30)";
 
         public static string headerText()
         {
@@ -34,7 +34,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL
                 Console.ReadKey();
 
             }
-            if (args.Length >= 1 && File.Exists(args[0]))
+            else if (args.Length >= 1 && File.Exists(args[0]))
             {
                 //FileInfo
                 FileInfo fileInfo1 = new FileInfo(args[0]);

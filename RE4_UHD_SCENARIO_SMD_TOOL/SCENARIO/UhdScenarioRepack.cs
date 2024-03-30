@@ -132,13 +132,16 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                             }
                             else
                             {
-                                Vector3 normal = new Vector3(
-                                arqObj.Normals[arqObj.Groups[iG].Faces[iF][iI].NormalIndex - 1].X,
-                                arqObj.Normals[arqObj.Groups[iG].Faces[iF][iI].NormalIndex - 1].Y,
-                                arqObj.Normals[arqObj.Groups[iG].Faces[iF][iI].NormalIndex - 1].Z
-                                );
+                                float nx = arqObj.Normals[arqObj.Groups[iG].Faces[iF][iI].NormalIndex - 1].X;
+                                float ny = arqObj.Normals[arqObj.Groups[iG].Faces[iF][iI].NormalIndex - 1].Y;
+                                float nz = arqObj.Normals[arqObj.Groups[iG].Faces[iF][iI].NormalIndex - 1].Z;
+                                float NORMAL_FIX = (float)Math.Sqrt((nx * nx) + (ny * ny) + (nz * nz));
+                                NORMAL_FIX = (NORMAL_FIX == 0) ? 1 : NORMAL_FIX;
+                                nx /= NORMAL_FIX;
+                                ny /= NORMAL_FIX;
+                                nz /= NORMAL_FIX;
 
-                                vertice.Normal = normal;
+                                vertice.Normal = new Vector3(nx, ny, nz);
                             }
 
                             vertice.Color = color;
