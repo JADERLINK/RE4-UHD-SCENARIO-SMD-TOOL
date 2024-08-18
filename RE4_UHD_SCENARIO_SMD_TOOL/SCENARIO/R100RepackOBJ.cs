@@ -15,13 +15,10 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
         private static void RepackOBJ(Stream objFile, ref R100RepackIdx idx, 
             out Dictionary<int, Dictionary<int, SmdBaseLine>> objGroupInfosList, 
             out Dictionary<int, Dictionary<int, FinalStructure>> FinalBinListDic,
-            out int[] maxBin)
+            out int[] maxBin, bool LoadColorsFromObjFile = true)
         {
             string patternR100 = "^(FILE_)([0]{0,})([0-6]{1})(#SMD_)([0]{0,})([0-9]{1,3})(#SMX_)([0]{0,})([0-9]{1,3})(#TYPE_)([0]{0,})([0-9|A-F]{1,8})(#BIN_)([0]{0,})([0-9]{1,3})(#).*$";
             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(patternR100, System.Text.RegularExpressions.RegexOptions.CultureInvariant);
-
-
-            bool LoadColorsFromObjFile = true;
 
             // load .obj file
             var objLoaderFactory = new ObjLoader.Loader.Loaders.ObjLoaderFactory();

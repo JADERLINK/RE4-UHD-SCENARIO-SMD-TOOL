@@ -47,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ALL\CONSTs.cs" />
-    <Compile Include="ALL\FloatExtencions.cs" />
+    <Compile Include="ALL\FloatExtensions.cs" />
     <Compile Include="ALL\IdxMaterial.cs" />
     <Compile Include="ALL\IdxMaterialLoad.cs" />
     <Compile Include="ALL\IdxMaterialParser.cs" />
@@ -62,12 +62,14 @@
     <Compile Include="EXTRACT\UhdBinDecoder.cs" />
     <Compile Include="EXTRACT\UhdTPL.cs" />
     <Compile Include="EXTRACT\UhdTplDecoder.cs" />
+    <Compile Include="SCENARIO\CheckDinamicVertexColor.cs" />
     <Compile Include="SCENARIO\IdxUhdScenarioLoader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="REPACK\BINrepackIntermediaryL2.cs" />
     <Compile Include="SCENARIO\MakeSMD_Scenario.cs" />
     <Compile Include="SCENARIO\MakeSMD_WithBinFolder.cs" />
+    <Compile Include="SCENARIO\PutEmptyBin.cs" />
     <Compile Include="SCENARIO\R100Extract.cs" />
     <Compile Include="SCENARIO\R100Repack.cs" />
     <Compile Include="SCENARIO\R100RepackOBJ.cs" />

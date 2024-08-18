@@ -11,7 +11,7 @@ namespace RE4_UHD_BIN_TOOL.ALL
         public static string ReturnValidHexValue(string cont)
         {
             string res = "";
-            foreach (var c in cont)
+            foreach (var c in cont.ToUpperInvariant())
             {
                 if (char.IsDigit(c)
                     || c == 'A'

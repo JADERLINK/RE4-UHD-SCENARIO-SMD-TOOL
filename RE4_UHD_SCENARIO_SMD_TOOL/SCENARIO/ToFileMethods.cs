@@ -16,10 +16,6 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
         {
             this.DirectoryToSave = DirectoryToSave;
             this.EnableExtract = EnableExtract;
-            if (EnableExtract)
-            {
-                Directory.CreateDirectory(DirectoryToSave);
-            }
         }
 
         public void ToFileBin(Stream fileStream, long binOffset, long endOffset, int binID)
@@ -35,7 +31,9 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     byte[] binArray = new byte[lenght];
                     fileStream.Read(binArray, 0, (int)lenght);
 
-                    string binPath = DirectoryToSave + binID.ToString("D4") + ".BIN";
+                    string binPath = Path.Combine(DirectoryToSave, binID.ToString("D4") + ".BIN");
+
+                    Directory.CreateDirectory(DirectoryToSave);
                     File.WriteAllBytes(binPath, binArray);
                 }
                 catch (Exception ex)
@@ -58,7 +56,9 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     byte[] tplArray = new byte[tplLenght];
                     fileStream.Read(tplArray, 0, (int)tplLenght);
 
-                    string tplPath = DirectoryToSave + "TPL.TPL";
+                    string tplPath = Path.Combine(DirectoryToSave, "TPL.TPL");
+
+                    Directory.CreateDirectory(DirectoryToSave);
                     File.WriteAllBytes(tplPath, tplArray);
                 }
                 catch (Exception ex)

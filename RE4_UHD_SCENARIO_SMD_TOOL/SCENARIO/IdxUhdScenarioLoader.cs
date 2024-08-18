@@ -23,7 +23,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                 {
                     var split = line.Trim().Split(new char[] { ':' });
 
-                    if (line.TrimStart().StartsWith(":") || line.TrimStart().StartsWith("#") || line.TrimStart().StartsWith("/"))
+                    if (line.TrimStart().StartsWith(":") || line.TrimStart().StartsWith("#") || line.TrimStart().StartsWith("/") || line.TrimStart().StartsWith("\\"))
                     {
                         continue;
                     }
@@ -45,17 +45,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
             IdxUhdScenario idxScenario = new IdxUhdScenario();
 
-            int smdAmount = 0;
-
-            //SMDAMOUNT
-            try
-            {
-                string value = Utils.ReturnValidDecValue(pair["SMDAMOUNT"]);
-                smdAmount = int.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
-            }
-            catch (Exception)
-            {
-            }
+            int smdAmount = GetIntDec(ref pair, "SMDAMOUNT", 0); ;
 
             //SMDFILENAME
             try
@@ -72,8 +62,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     value = "null";
                 }
 
-                var fileinfo = new FileInfo(value);
-                idxScenario.SmdFileName = fileinfo.Name.Remove(fileinfo.Name.Length - fileinfo.Extension.Length, fileinfo.Extension.Length) + ".SMD";
+                idxScenario.SmdFileName = Path.GetFileNameWithoutExtension(value) + ".SMD";
             }
             catch (Exception)
             {
@@ -100,71 +89,28 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             }
 
             //BinAmount
-            try
-            {
-                string value = Utils.ReturnValidDecValue(pair["BINAMOUNT"]);
-                idxScenario.BinAmount = int.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
-            }
-            catch (Exception)
-            {
-            }
+            idxScenario.BinAmount = GetIntDec(ref pair, "BINAMOUNT", 0);
 
-            //UseIdxMaterial
-            try
-            {
-                idxScenario.UseIdxMaterial = bool.Parse(pair["USEIDXMATERIAL"].ToLower());
-            }
-            catch (Exception)
-            {
-            }
 
-            //EnableVertexColor
-            try
-            {
-                idxScenario.EnableVertexColor = bool.Parse(pair["ENABLEVERTEXCOLOR"].ToLower());
-            }
-            catch (Exception)
-            {
-            }
+            idxScenario.UseIdxMaterial = GetBool(ref pair, "USEIDXMATERIAL");
+            idxScenario.EnableVertexColor = GetBool(ref pair, "ENABLEVERTEXCOLOR");
+            idxScenario.UseIdxUhdTpl = GetBool(ref pair, "USEIDXUHDTPL");
+            idxScenario.EnableDinamicVertexColor = GetBool(ref pair, "ENABLEDINAMICVERTEXCOLOR");
 
-            // new in B.1.0.0.1
+
             //Magic
-            try
-            {
-                string value = Utils.ReturnValidHexValue(pair["MAGIC"]);
-                idxScenario.Magic = ushort.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-            }
-            catch (Exception)
-            {
-                idxScenario.Magic = 0x0040;
-            }
+            idxScenario.Magic = GetUshortHex(ref pair, "MAGIC", 0x0040);
 
-            int ExtraParameterAmount = 0;
-
-            try
-            {
-                string value = Utils.ReturnValidDecValue(pair["EXTRAPARAMETERAMOUNT"]);
-                ExtraParameterAmount = int.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
-            }
-            catch (Exception)
-            {
-            }
+            int ExtraParameterAmount = GetIntDec(ref pair, "EXTRAPARAMETERAMOUNT", 0);
 
             uint[] ExtraParameters = new uint[ExtraParameterAmount];
 
             for (int i = 0; i < ExtraParameterAmount; i++)
             {
-                try
-                {
-                    string value = Utils.ReturnValidDecValue(pair["EXTRAPARAMETER" + i]);
-                    ExtraParameters[i] = uint.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                }
+                ExtraParameters[i] = GetUintDec(ref pair, "EXTRAPARAMETER" + i, 0);
             }
 
-            //---
+            //-------
 
             SMDLineIdx[] smdLines = new SMDLineIdx[smdAmount];
             SMDLineIdxExtras[] SmdLinesExtras = new SMDLineIdxExtras[smdAmount];
@@ -285,6 +231,26 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             return res;
         }
 
+        public static ushort GetUshortHex(ref Dictionary<string, string> pair, string key, ushort DefaultValue)
+        {
+            ushort res = DefaultValue;
+
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    string value = Utils.ReturnValidHexValue(pair[key]);
+                    res = ushort.Parse(value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    res = DefaultValue;
+                }
+            }
+
+            return res;
+        }
+
         public static byte GetByteDec(ref Dictionary<string, string> pair, string key, byte DefaultValue) 
         {
             byte res = DefaultValue;
@@ -345,7 +311,64 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             return res;
         }
 
+        public static uint GetUintDec(ref Dictionary<string, string> pair, string key, uint DefaultValue)
+        {
+            uint res = DefaultValue;
 
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    string value = Utils.ReturnValidDecValue(pair[key]);
+                    res = uint.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    res = DefaultValue;
+                }
+            }
+
+            return res;
+        }
+
+        public static int GetIntDec(ref Dictionary<string, string> pair, string key, int DefaultValue)
+        {
+            int res = DefaultValue;
+
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    string value = Utils.ReturnValidDecValue(pair[key]);
+                    res = int.Parse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    res = DefaultValue;
+                }
+            }
+
+            return res;
+        }
+
+        public static bool GetBool(ref Dictionary<string, string> pair, string key)
+        {
+            bool res = false;
+
+            if (pair.ContainsKey(key))
+            {
+                try
+                {
+                    res = bool.Parse(pair[key].Trim().ToLower());
+                }
+                catch (Exception)
+                {
+                    res = false;
+                }
+            }
+
+            return res;
+        }
     }
 
 
@@ -362,7 +385,10 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
         // only in .idxuhdscenario
         public bool UseIdxMaterial = false;
+        public bool UseIdxUhdTpl = false;
         public bool EnableVertexColor = false;
+        public bool EnableDinamicVertexColor = false;
+
 
         // only in .idxuhdsmd
         public int BinAmount = 0;

@@ -468,6 +468,12 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             UhdBinHeader header = new UhdBinHeader();
 
             header.bone_offset = br.ReadUInt32(); //--headersize // 60 00 00 00
+
+            if ( ! (header.bone_offset == 0x00000060 || header.bone_offset == 0x00000040 || header.bone_offset == 0x00000050))
+            {
+                throw new ArgumentException("Invalid BIN file!");
+            }
+
             header.unknown_x04 = br.ReadUInt32(); //--zeros
             header.unknown_x08 = br.ReadUInt32(); // offset // 50 00 00 00
             header.vertex_colour_offset = br.ReadUInt32();
@@ -496,12 +502,13 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             header.vertex_normal_count = br.ReadUInt16();
             header.version_flags = br.ReadUInt32();
 
-
-            header.bonepair_offset = br.ReadUInt32();
-            header.adjacent_offset = br.ReadUInt32();
-            header.vertex_weight_index_offset = br.ReadUInt32();  //--vertex weights id's array (2 words )* numvertex
-            header.vertex_weight2_index_offset = br.ReadUInt32(); //--vertex weights array (2 words )* numvertex
-
+            if (header.bone_offset >= 0x50)
+            {
+                header.bonepair_offset = br.ReadUInt32();
+                header.adjacent_offset = br.ReadUInt32();
+                header.vertex_weight_index_offset = br.ReadUInt32();  //--vertex weights id's array (2 words )* numvertex
+                header.vertex_weight2_index_offset = br.ReadUInt32(); //--vertex weights array (2 words )* numvertex
+            }
 
             return header;
         }

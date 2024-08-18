@@ -17,7 +17,7 @@ namespace RE4_UHD_BIN_TOOL.EXTRACT
             br.BaseStream.Position = startOffset;
 
             uint magic = br.ReadUInt32();
-            if (magic != 0x78563412)
+            if ( ! (magic == 0x78563412 || magic == 0x12345678))
             {
                 throw new ArgumentException("Invalid TPL file!");
             }

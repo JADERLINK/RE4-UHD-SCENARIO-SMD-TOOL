@@ -11,12 +11,14 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 {
     public static partial class UhdScenarioRepack
     {
-        public static void RepackOBJ(Stream objFile, ref IdxUhdScenario idxScenario, out Dictionary<int, SmdBaseLine> objGroupInfos, out Dictionary<int, FinalStructure> FinalBinList)
+        public static void RepackOBJ(Stream objFile, 
+            ref IdxUhdScenario idxScenario, 
+            out Dictionary<int, SmdBaseLine> objGroupInfos, 
+            out Dictionary<int, FinalStructure> FinalBinList,
+            bool LoadColorsFromObjFile = true)
         {
             string patternUHDSCENARIO = "^(UHDSCENARIO#SMD_)([0]{0,})([0-9]{1,3})(#SMX_)([0]{0,})([0-9]{1,3})(#TYPE_)([0]{0,})([0-9|A-F]{1,8})(#BIN_)([0]{0,})([0-9]{1,3})(#).*$";
             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(patternUHDSCENARIO, System.Text.RegularExpressions.RegexOptions.CultureInvariant);
-
-            bool LoadColorsFromObjFile = true;
 
             // load .obj file
             var objLoaderFactory = new ObjLoader.Loader.Loaders.ObjLoaderFactory();

@@ -23,7 +23,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
         public static void Repack(FileInfo fileInfo1) 
         {
-            string baseFileName = fileInfo1.Name.Substring(0, fileInfo1.Name.Length - fileInfo1.Extension.Length);
+            string baseFileName = Path.GetFileNameWithoutExtension(fileInfo1.Name);
             string baseDirectory = fileInfo1.Directory.FullName + "\\";
 
             Stream idxFile = fileInfo1.OpenRead();
@@ -92,8 +92,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     return;
                 }
 
-                //opcional nesse caso
-                if (File.Exists(idxuhdtplPath))
+                if (idx.UseIdxUhdTpl && File.Exists(idxuhdtplPath))
                 {
                     Console.WriteLine("Load File: " + baseFileName + ".idxuhdtpl");
                     idxuhdtplFile = new FileInfo(idxuhdtplPath).OpenRead();
@@ -141,7 +140,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             Dictionary<int, Dictionary<int, SmdBaseLine>> objGroupInfosList = null;
             Dictionary<int, Dictionary<int, RE4_UHD_BIN_TOOL.REPACK.Structures.FinalStructure>> FinalBinListDic = null;
             int[] maxBin = null;
-            RepackOBJ(objFile, ref idx, out objGroupInfosList, out FinalBinListDic, out maxBin);
+            RepackOBJ(objFile, ref idx, out objGroupInfosList, out FinalBinListDic, out maxBin, idx.EnableVertexColor || idx.EnableDinamicVertexColor);
 
             //cria arquivos .smd
             Console.WriteLine("Creating .SMD files");
@@ -153,8 +152,10 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                 Dictionary<int, SmdBaseLine> objGroupInfos = objGroupInfosList[fil];
 
                 IdxUhdScenario idxUhdScenario = new IdxUhdScenario();
+                idxUhdScenario.EnableDinamicVertexColor = idx.EnableDinamicVertexColor;
                 idxUhdScenario.EnableVertexColor = idx.EnableVertexColor;
                 idxUhdScenario.UseIdxMaterial = idx.UseIdxMaterial;
+                idxUhdScenario.UseIdxUhdTpl = idx.UseIdxUhdTpl;
                 idxUhdScenario.BinAmount = maxBin[fil];
                 idxUhdScenario.BinFolder = idx.BinFolder[fil];
                 idxUhdScenario.SmdAmount = idx.SmdAmount[fil];
@@ -195,7 +196,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                     }
                 }
 
-                MakeSMD_Scenario.CreateSMD(baseDirectory, idx.SmdFileName[fil], objGroupInfos, idxUhdScenario, FinalBinListDic[fil], material, _uhdTPL, idx.EnableVertexColor, true);
+                MakeSMD_Scenario.CreateSMD(baseDirectory, idx.SmdFileName[fil], objGroupInfos, idxUhdScenario, FinalBinListDic[fil], material, _uhdTPL, idx.EnableVertexColor, idx.EnableDinamicVertexColor, true);
 
 
                 //create new R100.FILE_?.Repack.idxuhdsmd
@@ -222,7 +223,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                 {
                     var split = line.Trim().Split(new char[] { ':' });
 
-                    if (line.TrimStart().StartsWith(":") || line.TrimStart().StartsWith("#") || line.TrimStart().StartsWith("/"))
+                    if (line.TrimStart().StartsWith(":") || line.TrimStart().StartsWith("#") || line.TrimStart().StartsWith("/") || line.TrimStart().StartsWith("\\"))
                     {
                         continue;
                     }
@@ -310,25 +311,11 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                 }
 
             }
-         
-            //UseIdxMaterial
-            try
-            {
-                idx.UseIdxMaterial = bool.Parse(pair["USEIDXMATERIAL"].ToLower());
-            }
-            catch (Exception)
-            {
-            }
 
-            //EnableVertexColor
-            try
-            {
-                idx.EnableVertexColor = bool.Parse(pair["ENABLEVERTEXCOLOR"].ToLower());
-            }
-            catch (Exception)
-            {
-            }
-
+            idx.UseIdxMaterial = IdxUhdScenarioLoader.GetBool(ref pair, "USEIDXMATERIAL");
+            idx.EnableVertexColor = IdxUhdScenarioLoader.GetBool(ref pair, "ENABLEVERTEXCOLOR");
+            idx.UseIdxUhdTpl = IdxUhdScenarioLoader.GetBool(ref pair, "USEIDXUHDTPL");
+            idx.EnableDinamicVertexColor = IdxUhdScenarioLoader.GetBool(ref pair, "ENABLEDINAMICVERTEXCOLOR");
 
             //---
 
@@ -399,7 +386,9 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
         public SMDLineIdx[][] SmdLines;
 
         public bool UseIdxMaterial = false;
+        public bool UseIdxUhdTpl = false;
         public bool EnableVertexColor = false;
+        public bool EnableDinamicVertexColor = false;
     }
 
 }

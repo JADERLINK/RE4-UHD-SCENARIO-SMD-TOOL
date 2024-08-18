@@ -423,7 +423,7 @@ namespace RE4_UHD_BIN_TOOL.REPACK
             header.vertex_scale = 0; // afazer
             header.unknown_x29 = 0;
           
-            header.morph_offset = 0; // não suportado nessa versão do pragrama
+            header.morph_offset = 0; // não suportado nessa versão do programa
 
 
             header.vertex_position_offset = VertexPositionOffset;

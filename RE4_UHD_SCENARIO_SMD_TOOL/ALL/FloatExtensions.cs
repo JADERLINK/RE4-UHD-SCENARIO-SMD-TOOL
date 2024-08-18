@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RE4_UHD_BIN_TOOL.ALL
 {
-    public static class FloatExtencions
+    public static class FloatExtensions
     {
         public static string ToFloatString(this float value)
         {
@@ -15,7 +15,6 @@ namespace RE4_UHD_BIN_TOOL.ALL
             s = s.EndsWith(".") ? s+'0' : s;
             return s;
         }
-
 
     }
 }

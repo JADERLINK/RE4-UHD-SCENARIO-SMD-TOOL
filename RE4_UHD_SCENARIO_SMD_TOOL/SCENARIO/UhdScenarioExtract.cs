@@ -192,7 +192,9 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             text.WriteLine("SmdFileName:" + SmdFileName);
             text.WriteLine("BinFolder:" + binFolder);
             text.WriteLine("UseIdxMaterial:false");
+            text.WriteLine("UseIdxUhdTpl:false");
             text.WriteLine("EnableVertexColor:false");
+            text.WriteLine("EnableDinamicVertexColor:true");
 
             text.WriteLine("");
             for (int i = 0; i < smdLines.Length; i++)

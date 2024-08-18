@@ -36,10 +36,10 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
         public static void Extract(FileInfo fileInfo1) 
         {
             string baseDirectory = fileInfo1.Directory.FullName + "\\";
-            string baseFileName = fileInfo1.Name.Substring(0, fileInfo1.Name.Length - fileInfo1.Extension.Length);
+            string baseFileName = Path.GetFileNameWithoutExtension(fileInfo1.Name);
             string baseName_allparts = baseFileName + ".allparts";
             string baseName_custom = baseFileName + ".custom";
-            string baseSubDirectory = Path.Combine(new string[] { baseDirectory, baseFileName }) + "\\";
+            string baseSubDirectory = Path.Combine(baseDirectory, baseFileName) + "\\";
 
             string[] files = Read_r100extract(fileInfo1);
             Console.WriteLine("SMD files:");
@@ -347,8 +347,7 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
                         value = "null";
                     }
 
-                    var fileinfo = new FileInfo(value);
-                    res[i] = fileinfo.Name.Remove(fileinfo.Name.Length - fileinfo.Extension.Length, fileinfo.Extension.Length) + ".SMD";
+                    res[i] = Path.GetFileNameWithoutExtension(value) + ".SMD";
                 }
                 catch (Exception)
                 {
@@ -470,7 +469,9 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
             }
 
             text.WriteLine("UseIdxMaterial:false");
+            text.WriteLine("UseIdxUhdTpl:false");
             text.WriteLine("EnableVertexColor:false");
+            text.WriteLine("EnableDinamicVertexColor:true");
 
             text.WriteLine("");
 

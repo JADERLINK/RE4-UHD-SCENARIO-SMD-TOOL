@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("JADERLINK")]
 [assembly: AssemblyProduct("RE4_UHD_SCENARIO_SMD_TOOL")]
-[assembly: AssemblyCopyright("Copyright ©JADERLINK 2023")]
+[assembly: AssemblyCopyright("Copyright ©JADERLINK 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

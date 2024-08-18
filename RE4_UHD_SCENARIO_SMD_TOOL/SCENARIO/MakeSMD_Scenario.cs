@@ -12,8 +12,17 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 {
     public static class MakeSMD_Scenario
     {
-        public static void CreateSMD(string baseDirectory, string smdFileName, Dictionary<int, SmdBaseLine> lines, IdxUhdScenario idxScenario, 
-            Dictionary<int, FinalStructure> finalBinList, IdxMaterial material, UhdTPL uhdTPL, bool EnableVertexColors, bool createBinFiles)
+        public static void CreateSMD(
+            string baseDirectory, 
+            string smdFileName, 
+            Dictionary<int, SmdBaseLine> lines, 
+            IdxUhdScenario idxScenario, 
+            Dictionary<int, FinalStructure> finalBinList, 
+            IdxMaterial material, 
+            UhdTPL uhdTPL, 
+            bool EnableVertexColors, 
+            bool EnableDinamicVertexColor,
+            bool createBinFiles)
         {
             string binPath = baseDirectory + idxScenario.BinFolder + "\\";
 
@@ -181,27 +190,33 @@ namespace RE4_UHD_SCENARIO_SMD_TOOL.SCENARIO
 
                 if (finalBinList.ContainsKey(i))
                 {
-                    RE4_UHD_BIN_TOOL.REPACK.BINmakeFile.MakeFile(stream, tempOffset, out outOffset, finalBinList[i],
-                        boneLineArray, material, new byte[0][], true, false, false, false, EnableVertexColors);
+                    bool EnableColor = EnableVertexColors || CheckDinamicVertexColor.Check(finalBinList[i], EnableDinamicVertexColor);
 
-                    if (createBinFiles)
+                    RE4_UHD_BIN_TOOL.REPACK.BINmakeFile.MakeFile(stream, tempOffset, out outOffset, finalBinList[i],
+                        boneLineArray, material, new byte[0][], true, false, false, false, EnableColor);
+                }
+                else 
+                {
+                    PutEmptyBin.Action(stream, tempOffset, out outOffset);
+                }
+
+                if (createBinFiles)
+                {
+                    try
                     {
-                        try
-                        {
-                            //--salva em um arquivo
-                            stream.Position = tempOffset;
-                            int lenght = (int)(outOffset - tempOffset);
-                            byte[] bin = new byte[lenght];
-                            stream.Read(bin, 0, lenght);
-                            File.WriteAllBytes(binPath + i.ToString("D4") + ".BIN", bin);
-                            stream.Position = outOffset;
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Error on write in file: " + i.ToString("D3") + ".BIN" + Environment.NewLine + ex.ToString());
-                        }
-                       
+                        //--salva em um arquivo
+                        stream.Position = tempOffset;
+                        int lenght = (int)(outOffset - tempOffset);
+                        byte[] bin = new byte[lenght];
+                        stream.Read(bin, 0, lenght);
+                        File.WriteAllBytes(binPath + i.ToString("D4") + ".BIN", bin);
+                        stream.Position = outOffset;
                     }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error on write in file: " + i.ToString("D3") + ".BIN" + Environment.NewLine + ex.ToString());
+                    }
+
                 }
 
                 uint FileLength = (uint)(outOffset - tempOffset);
