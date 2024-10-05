@@ -1,9 +1,10 @@
 # RE4-UHD-SCENARIO-SMD-TOOL
-Extract and repack RE4 UHD scenario smd file
+Extract and repack RE4 UHD/PS4/NS Scenario SMD file
 
 **Translate from Portuguese Brazil**
 
 Programa destinado a extrair e recompactar os cenários usando somente um arquivo .OBJ;
+<br>Nota: A versão de UHD é um executável e a versão de Ps4/Ns é outro executável;
 
 ## Tutorial
 Veja abaixo tutoriais em português de como usar a tool:
@@ -12,14 +13,18 @@ Veja abaixo tutoriais em português de como usar a tool:
 
 ## Updates
 
+**Update: B.1.2.0**
+<br>Adicionado suporte para as versões de PS4 e NS;
+<br>Aviso: não misture os Bin/Tpl da versão UHD com a versão de PS4/NS, pois vai dar erro no jogo e o programa não vai mais conseguir extrair o SMD;
+
 **Update: B.1.1.0**
 <br>Adicionado o campo "EnableDinamicVertexColor" no arquivo ".idxuhdscenario", que ao ativar será colocado somente o conteúdo de "VertexColor" para os BINs que realmente tenham cor por vértice.
 <br>Agora, numerações de BIN puladas serão preenchidas com um bin de 0 (zero) materiais.
 <br>Nota: SMD_Entry pulados, ainda vai ser atribuído o BIN de ID 0;
-<br>Agora, ao fazer repack com ".idxuhdscenario" o arquivo ".idxuhdtpl" será ignorado, para usá-lo, você deve ativar a variável "UseIdxUhdTpl" dentro do ".idxuhdscenario";
+<br>Agora, ao fazer repack com ".idxuhdscenario" o arquivo ".idxuhdtpl" será ignorado. Para usá-lo, você deve ativar a variável "UseIdxUhdTpl" dentro do ".idxuhdscenario";
 
 **Update: B.1.0.09**
-<br>Agora, ao extrair o arquivo .bin as "normals" serão normalizadas em vez de ser dividido por um valor padrão, então agora é possível extrair os arquivos .bin gerados pela tool do percia sem erros.
+<br>Agora, ao extrair o arquivo .bin as "normals" serão normalizadas, em vez de ser dividida por um valor padrão, então agora é possível extrair os arquivos .bin gerados pela tool do percia sem erros.
 <br> Ao fazer repack as normals do arquivo .obj serão normalizadas para evitar erros.
 <br> O programa, ao gerar o arquivo .obj, não terá mais os zeros não significativos dos números, mudança feita para gerar arquivos menores.
 
@@ -60,15 +65,15 @@ então, caso esteja usando um .obj de versões anteriores, recalcule as normals;
 <br> * Corrigido a extração do campo "vertexColors", no arquivo .obj;
 <br> * Os arquivos da versão anterior são compatíveis com essa versão.
 
-## RE4_UHD_SCENARIO_SMD_TOOL.exe
+## RE4_\*\*_SCENARIO_SMD_TOOL.exe
 
-Programa destinado a extrair e reempacotar os arquivos de cenario .SMD do re4 Uhd;
+Programa destinado a extrair e reempacotar os arquivos de cenario .SMD do RE4 Uhd/Ps4/Ns;
 
 ## Extract:
 
-Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Extract all scenario SMD.bat"
-<br>Nesse exemplo vou usar o arquivo: r204_004.SMD
-<br>Ao extrair será gerado os arquivos:
+Use o bat: "RE4_\*\*_SCENARIO_SMD_TOOL Extract all scenario SMD.bat"
+<br>Nesse exemplo, vou usar o arquivo: r204_004.SMD
+<br>Ao extrair, serão gerados os arquivos:
 
 * "r204_004.scenario.idxuhdscenario" // arquivo importante de configurações, para o repack usando o .obj;
 * "r204_004.scenario.idxuhdsmd" //  arquivo importante de configurações, para o repack usando os arquivos .bin;
@@ -81,51 +86,51 @@ Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Extract all scenario SMD.bat"
 ## Repack:
 
 Existem duas maneiras de fazer o repack.
-* usando o arquivo .idxuhdscenario, o repack será feito usando o arquivo .obj;
-* usando o arquivo .idxuhdsmd, o repack será feito com os arquivos .bin da pasta "r204_004_BIN";
+* Usando o arquivo .idxuhdscenario, o repack será feito usando o arquivo .obj;
+* Usando o arquivo .idxuhdsmd, o repack será feito com os arquivos .bin da pasta "r204_004_BIN";
 
 ## Repack com .idxuhdscenario
 
-Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Repack all with idxuhdscenario.bat"
-<br>Nesse exemplo vou usar o arquivo: "r204_004.scenario.idxuhdscenario"
+Use o bat: "RE4_\*\*_SCENARIO_SMD_TOOL Repack all with idxuhdscenario.bat";
+<br>Nesse exemplo, vou usar o arquivo: "r204_004.scenario.idxuhdscenario";
 <br> que vai requisitar os arquivos:
-* r204_004.scenario.obj (obrigatório)
-* r204_004.scenario.mtl OU r204_004.scenario.idxmaterial + r204_004.scenario.idxuhdtpl
+* r204_004.scenario.obj (obrigatório);
+* r204_004.scenario.mtl OU r204_004.scenario.idxmaterial + r204_004.scenario.idxuhdtpl;
 
-Ao fazer o repack será gerado os arquivos:
+Ao fazer o repack, serão gerados os arquivos:
 * "r204_004.SMD" (esse é o arquivo para ser colocado no .udas);
-* "r204_004.scenario.Repack.idxmaterial"
-* "r204_004.scenario.Repack.idxuhdtpl"
-* "r204_004.scenario.Repack.idxuhdsmd"
+* "r204_004.scenario.Repack.idxmaterial";
+* "r204_004.scenario.Repack.idxuhdtpl";
+* "r204_004.scenario.Repack.idxuhdsmd";
 * "r204_004_BIN\" //pasta contendo os novos arquivos .bin e o novo .tpl; (aviso: ele sobrescreve os arquivos);
 
 ## Repack com .idxuhdsmd
 
-Use o bat: "RE4_UHD_SCENARIO_SMD_TOOL Repack all with idxuhdsmd.bat"
-<br>Nesse exemplo vou usar o arquivo: "r204_004.scenario.idxuhdsmd"
-<br> que vai requisitar os arquivos:
+Use o bat: "RE4_\*\*_SCENARIO_SMD_TOOL Repack all with idxuhdsmd.bat";
+<br>Nesse exemplo, vou usar o arquivo: "r204_004.scenario.idxuhdsmd";
+<br> Que vai requisitar os arquivos:
 <br>-- os arquivos .bin e .tpl da pasta "r204_004_BIN";
 
-Ao fazer o repack será gerado os arquivos:
+Ao fazer o repack, será gerado o arquivo:
 <br>-- "r204_004.SMD" (esse é o arquivo para ser colocado no .udas);
 
-Nota: esse é o método antigo, no qual se edita os bin individualmente, porem o repack com .idxuhdscenario cria novos bin modificados, e um novo .idxuhdsmd, no qual pode ser usado para fazer esse repack; essa opção é para caso você queira colocar um .bin no .smd que o programa não consiga criar.
+Nota: esse é o método antigo, no qual se edita os bin individualmente, porém o repack com .idxuhdscenario cria novos bin modificados, e um novo .idxuhdsmd, no qual pode ser usado para fazer esse repack; essa opção é para caso você queira colocar um .bin no .smd que o programa não consiga criar.
 
 ## Sobre r204_004.scenario.obj
 
-Esse arquivo é onde está todo o cenário, nele os arquivos BIN são separados por grupos, no qual é nomenclatura deve ser respeitada:
+Esse arquivo é onde está todo o cenário, nele os arquivos BIN são separados por grupos, no qual a nomenclatura deve ser respeitada:
 <br> Exemplo:
 <br> UHDSCENARIO#SMD_000#SMX_000#TYPE_08#BIN_000#
 <br> UHDSCENARIO#SMD_001#SMX_001#TYPE_08#BIN_001#
 
 Sendo:
-* É obrigatório o nome do grupo começar com "UHDSCENARIO", e ser divido por #
+* É obrigatório o nome do grupo começar com "UHDSCENARIO", e ser dividido por #
 * A ordem dos campos não pode ser mudada;
-* SMD_000 esse é o ID do da posição da Entry/Line no .SMD, a numeração é em decimal
-* SMX_000 esse é o ID do SMX, veja o arquivo .SMX,  a numeração é em decimal
-* TYPE_08 esse não sei oque é, a numeração é em hexadecimal.
-* BIN_000 esse é o id do bin que será usado, para bin repetidos, será considerado somente o primeiro, (o próximo com o mesmo id, será usado o mesmo modelo que do primeiro).
-* o nome do grupo deve terminar com # (pois depois de salvo o arquivo, o blender coloca mais texto no final do nome do grupo)
+* SMD_000 esse é o ID da posição da Entry/Line no .SMD, a numeração é em decimal;
+* SMX_000 esse é o ID do SMX, veja o arquivo .SMX,  a numeração é em decimal;
+* TYPE_08 esse é uma flag bit a bit, a numeração é em hexadecimal;
+* BIN_000 esse é o id do bin que será usado. Para bin repetidos, será considerado somente o primeiro, (o próximo, com o mesmo id, será usado o mesmo modelo que do primeiro).
+* O nome do grupo deve terminar com # (pois após salvo o arquivo, o Blender coloca mais texto no final do nome do grupo);
 
 ----> No Update B.1.0.0.2, o nome dos objetos/grupos também pode ser:
 <br> UHDSCENARIO\_SMD\_000\_SMX\_000\_TYPE\_08\_BIN\_000\_
@@ -133,24 +138,24 @@ Sendo:
 
 ----> Sobre verificações de grupos:
 <br> * No Repack se ao lado direito do nome do grupo aparecer o texto "The group name is wrong;", significa que o nome do grupo está errado, e o seu arquivo SMD vai ficar errado;
-<br> * E se ao lado direito aparecer "Warning: Group not used;" esse grupo esta sendo ignorado pelo meu programa, caso, na verdade, você gostaria de usá-lo, você deve arrumar o nome do grupo;
+<br> * E se ao lado direito aparecer "Warning: Group not used;" esse grupo está sendo ignorado pelo meu programa. Caso, na verdade, você gostaria de usá-lo, você deve arrumar o nome do grupo;
 
 
 **Editando o arquivo .obj no Blender**
-<br>No importador de .obj marque a caixa "Split By Group" que esta no lado direto da tela.
+<br>No importador de .obj marque a caixa "Split By Group" que está no lado direito da tela.
 <br>Com o arquivo importado, cada objeto representa um arquivo .BIN
 <br>![Groups](UhdGroups.png)
-<br>Nota: caso você tenha problema com texturas transparente ficando pretas use esse plugin: (**[link](https://github.com/JADERLINK/Blender_Transparency_Fix_Plugin)**) 
+<br>Nota: caso você tenha problema com texturas transparentes ficando pretas, use esse plugin: (**[link](https://github.com/JADERLINK/Blender_Transparency_Fix_Plugin)**) 
 
 **Ao salvar o arquivo**
 <br>Marque as caixas "Triangulated Mesh" e "Object Groups" e "Colors".
-<br> no arquivo .obj o nome dos grupos vão ficar com "_Mesh" no final do nome (por isso no editor termina o nome do grupo com # para evitar problemas)
+<br> no arquivo .obj o nome dos grupos vai ficar com "_Mesh" no final do nome (por isso, no editor, termina o nome do grupo com # para evitar problemas);
 
 ## Sobre .idxuhdscenario / .idxuhdsmd
 Segue abaixo a lista de comandos mais importantes presente no arquivo:
 
-* SmdAmount:106 // representa a quantidade de Entry/Line no .Smd <del>(você pode mudar, mas em alguns cenários pode estar crashando o jogo)</del>
-* SmdFileName:r204_004.SMD // esse é o nome do arquivo Smd que será gerado
+* SmdAmount:106 // representa a quantidade de Entry/Line no .Smd, coloque a mesma quantidade que você colocou de entry no arquivo .obj;
+* SmdFileName:r204_004.SMD // esse é o nome do arquivo Smd que será gerado;
 * BinFolder:r204_004_BIN // esse é o nome da pasta onde será salvo/estão os arquivos .bin e o .tpl;
 UseIdxMaterial:false // Caso ativado, será o usado o arquivo .idxmaterial e .idxuhdtpl ao invés do .mtl para fazer o repack (campo somente no idxuhdscenario);
 * UseIdxUhdTpl:false // usa o conteúdo de UseIdxUhdTpl para forçar a ordem dos Ids dos TplEntry ao fazer o repack (campo somente no idxuhdscenario);
@@ -166,13 +171,15 @@ Veja sobre em [RE4-UHD-BIN-TOOL](https://github.com/JADERLINK/RE4-UHD-BIN-TOOL);
 
 
 # sobre .r100extract e r100extract
-Para extrair o cenário coloque os arquivos .Smd necessários ao lado de .r100extract;
-<br> Nota: no topico **tutorial** tem um tutorial sobre como editar o r100;
+Para extrair o cenário, coloque os arquivos .Smd necessários ao lado de .r100extract;
+<br> Nota: No tópico **tutorial** tem um tutorial sobre como editar o r100;
 
 ## Código de terceiro:
 
 [ObjLoader by chrisjansson](https://github.com/chrisjansson/ObjLoader):
-Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL, código modificado, as modificações podem ser vistas aqui: [link](https://github.com/JADERLINK/ObjLoader).
+Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL\\CjClutter.ObjLoader.Loader, código modificado, as modificações podem ser vistas aqui: [link](https://github.com/JADERLINK/ObjLoader).
 
 **At.te: JADERLINK**
-<br>2024-08-18
+<br>Thanks to \"mariokart64n\" and \"CodeMan02Fr\"
+<br>Material information by \"Albert\"
+<br>2024-10-06
