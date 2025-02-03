@@ -53,8 +53,8 @@ namespace SHARED_UHD_BIN.EXTRACT
 
                 TplInfo tplInfo = new TplInfo();
 
-                tplInfo.width = br.ReadUInt16();
-                tplInfo.height = br.ReadUInt16();
+                tplInfo.height = br.ReadUInt16(); // Primeiro Altura
+                tplInfo.width = br.ReadUInt16();  // Segundo Largura
                 tplInfo.PixelFormatType = br.ReadUInt32();
 
                 uint secundOffset = br.ReadUInt32();

@@ -17,7 +17,7 @@ namespace SHARED_UHD_BIN.REPACK
             Line = line;
         }
 
-        public FinalBoneLine(sbyte boneId, sbyte boneParent, float posX, float posY, float posZ)
+        public FinalBoneLine(byte boneId, byte boneParent, float posX, float posY, float posZ)
         {
             BoneId = boneId;
             BoneParent = boneParent;
@@ -43,27 +43,27 @@ namespace SHARED_UHD_BIN.REPACK
             }
         }
 
-        public sbyte BoneId
+        public byte BoneId
         {
             get
             {
-                return (sbyte)_line[0];
+                return _line[0];
             }
             set
             {
-                _line[0] = (byte)value;
+                _line[0] = value;
             }
         }
 
-        public sbyte BoneParent
+        public byte BoneParent
         {
             get
             {
-                return (sbyte)_line[1];
+                return _line[1];
             }
             set
             {
-                _line[1] = (byte)value;
+                _line[1] = value;
             }
         }
 

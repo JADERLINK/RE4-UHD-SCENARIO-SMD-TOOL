@@ -13,6 +13,11 @@ Veja abaixo tutoriais em português de como usar a tool:
 
 ## Updates
 
+**Update: B.1.2.2**
+<br> Melhoria: melhorado a velocidade do repack, agora é muito rápido fazer o repack.
+<br> Correção: corrigido o "width X height" no TPL que estava invertido nas versões anteriores. A ordem correta no arquivo é "height X width";
+<br> E foram feitas melhorias gerais no código;
+
 **Update: B.1.2.0**
 <br>Adicionado suporte para as versões de PS4 e NS;
 <br>Aviso: não misture os Bin/Tpl da versão UHD com a versão de PS4/NS, pois vai dar erro no jogo e o programa não vai mais conseguir extrair o SMD;
@@ -182,4 +187,4 @@ Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL\\CjClutter.ObjLoader.Loader, código mo
 **At.te: JADERLINK**
 <br>Thanks to \"mariokart64n\" and \"CodeMan02Fr\"
 <br>Material information by \"Albert\"
-<br>2024-10-06
+<br>2025-02-03

@@ -69,8 +69,8 @@ namespace SHARED_UHD_BIN.REPACK
             {
                 TplInfo tplInfo = uhdTPL.TplArray[i];
 
-                bw.Write((ushort)tplInfo.width);
-                bw.Write((ushort)tplInfo.height);
+                bw.Write((ushort)tplInfo.height); // Primeiro Altura
+                bw.Write((ushort)tplInfo.width);  // Segundo Largura
                 bw.Write((uint)tplInfo.PixelFormatType);
                 bw.Write((uint)tempOffset);
                 if (IsPS4NS)

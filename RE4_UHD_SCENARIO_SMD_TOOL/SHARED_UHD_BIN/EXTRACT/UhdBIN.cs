@@ -61,8 +61,8 @@ namespace SHARED_UHD_BIN.EXTRACT
         // new byte[16];
         public byte[] boneLine;
 
-        public sbyte BoneID { get { return (sbyte)boneLine[0x0]; } }
-        public sbyte BoneParent { get { return (sbyte)boneLine[0x1]; } }
+        public byte BoneID { get { return boneLine[0x0]; } }
+        public byte BoneParent { get { return boneLine[0x1]; } }
 
         public float PositionX { get { return BitConverter.ToSingle(boneLine, 0x4); } }
         public float PositionY { get { return BitConverter.ToSingle(boneLine, 0x8); } }
@@ -105,8 +105,6 @@ namespace SHARED_UHD_BIN.EXTRACT
         public uint vertex_weight_index_offset;  //  //--vertex weights id's array (2 words ) * numvertex
         public uint vertex_weight2_index_offset; //  //--vertex weights array  (2 words ) * numvertex
     }
-
-
 
 
 }

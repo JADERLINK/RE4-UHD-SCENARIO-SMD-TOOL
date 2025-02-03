@@ -157,7 +157,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
             SHARED_UHD_BIN.REPACK.FinalBoneLine[] boneLineArray = new SHARED_UHD_BIN.REPACK.FinalBoneLine[1];
             boneLineArray[0] = new SHARED_UHD_BIN.REPACK.FinalBoneLine();
             boneLineArray[0].BoneId = 0;
-            boneLineArray[0].BoneParent = -1;
+            boneLineArray[0].BoneParent = 0xFF; //-1;
 
             // PARTE DOS ARQUIVOS BINS
 
