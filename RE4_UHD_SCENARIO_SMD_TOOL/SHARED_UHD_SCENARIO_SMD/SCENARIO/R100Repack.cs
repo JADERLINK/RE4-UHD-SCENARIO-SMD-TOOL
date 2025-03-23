@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using SHARED_UHD_BIN.ALL;
 using SHARED_UHD_BIN.EXTRACT;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 {
@@ -21,7 +22,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 
         private const int FileAmount = 7;
 
-        public static void Repack(FileInfo fileInfo1, bool IsPS4NS) 
+        public static void Repack(FileInfo fileInfo1, bool IsPS4NS, Endianness endianness) 
         {
             string baseFileName = Path.GetFileNameWithoutExtension(fileInfo1.Name);
             string baseDirectory = fileInfo1.Directory.FullName + "\\";
@@ -196,7 +197,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
                     }
                 }
 
-                MakeSMD_Scenario.CreateSMD(baseDirectory, idx.SmdFileName[fil], objGroupInfos, idxUhdScenario, FinalBinListDic[fil], material, _uhdTPL, idx.EnableVertexColor, idx.EnableDinamicVertexColor, true, IsPS4NS);
+                MakeSMD_Scenario.CreateSMD(baseDirectory, idx.SmdFileName[fil], objGroupInfos, idxUhdScenario, FinalBinListDic[fil], material, _uhdTPL, idx.EnableVertexColor, idx.EnableDinamicVertexColor, true, IsPS4NS, endianness);
 
 
                 //create new R100.FILE_?.Repack.idxuhdsmd

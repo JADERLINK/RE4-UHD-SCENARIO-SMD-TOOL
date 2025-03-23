@@ -7,6 +7,7 @@ using System.IO;
 using SHARED_UHD_BIN.ALL;
 using SHARED_UHD_BIN.EXTRACT;
 using SHARED_UHD_BIN.REPACK.Structures;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 {
@@ -23,7 +24,8 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
             bool EnableVertexColors, 
             bool EnableDinamicVertexColor,
             bool createBinFiles,
-            bool IsPS4NS)
+            bool IsPS4NS,
+            Endianness endianness)
         {
             string binPath = baseDirectory + idxScenario.BinFolder + "\\";
 
@@ -38,11 +40,11 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 
             byte[] header = new byte[0x10];
 
-            byte[] b_Magic = BitConverter.GetBytes(idxScenario.Magic);
+            byte[] b_Magic = EndianBitConverter.GetBytes(idxScenario.Magic, Endianness.LittleEndian);
             header[0] = b_Magic[0];
             header[1] = b_Magic[1];
 
-            byte[] b_SmdCount = BitConverter.GetBytes(SmdCount);
+            byte[] b_SmdCount = EndianBitConverter.GetBytes((ushort)SmdCount, endianness);
             header[2] = b_SmdCount[0];
             header[3] = b_SmdCount[1];
 
@@ -65,7 +67,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
                 binStreamPosition = div * 16;
             }
 
-            byte[] b_binStreamPosition = BitConverter.GetBytes(binStreamPosition);
+            byte[] b_binStreamPosition = EndianBitConverter.GetBytes(binStreamPosition, endianness);
             header[4] = b_binStreamPosition[0];
             header[5] = b_binStreamPosition[1];
             header[6] = b_binStreamPosition[2];
@@ -77,11 +79,11 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
             {
                 uint amount = (uint)idxScenario.ExtraParameters.Length;
                 byte[] b_ExtraParameters = new byte[(amount + 1) * 4];
-                BitConverter.GetBytes(amount).CopyTo(b_ExtraParameters, 0);
+                EndianBitConverter.GetBytes(amount, endianness).CopyTo(b_ExtraParameters, 0);
                 int tempcounter = 4;
                 for (int i = 0; i < idxScenario.ExtraParameters.Length; i++)
                 {
-                    BitConverter.GetBytes(idxScenario.ExtraParameters[i]).CopyTo(b_ExtraParameters, tempcounter);
+                    EndianBitConverter.GetBytes(idxScenario.ExtraParameters[i], endianness).CopyTo(b_ExtraParameters, tempcounter);
                     tempcounter += 4;
                 }
 
@@ -126,19 +128,19 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 
                 byte[] SMDLine = new byte[72];
 
-                BitConverter.GetBytes(positionX).CopyTo(SMDLine, 0);
-                BitConverter.GetBytes(positionY).CopyTo(SMDLine, 4);
-                BitConverter.GetBytes(positionZ).CopyTo(SMDLine, 8);
-                BitConverter.GetBytes(angleX).CopyTo(SMDLine, 12);
-                BitConverter.GetBytes(angleY).CopyTo(SMDLine, 16);
-                BitConverter.GetBytes(angleZ).CopyTo(SMDLine, 20);
-                BitConverter.GetBytes(scaleX).CopyTo(SMDLine, 24);
-                BitConverter.GetBytes(scaleY).CopyTo(SMDLine, 28);
-                BitConverter.GetBytes(scaleZ).CopyTo(SMDLine, 32);
-                BitConverter.GetBytes(BinID).CopyTo(SMDLine, 36);
+                EndianBitConverter.GetBytes(positionX, endianness).CopyTo(SMDLine, 0);
+                EndianBitConverter.GetBytes(positionY, endianness).CopyTo(SMDLine, 4);
+                EndianBitConverter.GetBytes(positionZ, endianness).CopyTo(SMDLine, 8);
+                EndianBitConverter.GetBytes(angleX, endianness).CopyTo(SMDLine, 12);
+                EndianBitConverter.GetBytes(angleY, endianness).CopyTo(SMDLine, 16);
+                EndianBitConverter.GetBytes(angleZ, endianness).CopyTo(SMDLine, 20);
+                EndianBitConverter.GetBytes(scaleX, endianness).CopyTo(SMDLine, 24);
+                EndianBitConverter.GetBytes(scaleY, endianness).CopyTo(SMDLine, 28);
+                EndianBitConverter.GetBytes(scaleZ, endianness).CopyTo(SMDLine, 32);
+                EndianBitConverter.GetBytes(BinID, Endianness.LittleEndian).CopyTo(SMDLine, 36);
                 SMDLine[38] = FixedFF;
                 SMDLine[39] = SmxID;
-                BitConverter.GetBytes(objectStatus).CopyTo(SMDLine, 68);
+                EndianBitConverter.GetBytes(objectStatus, endianness).CopyTo(SMDLine, 68);
 
                 stream.Write(SMDLine, 0, 72);
             }
@@ -155,7 +157,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 
             //boneLine
             SHARED_UHD_BIN.REPACK.FinalBoneLine[] boneLineArray = new SHARED_UHD_BIN.REPACK.FinalBoneLine[1];
-            boneLineArray[0] = new SHARED_UHD_BIN.REPACK.FinalBoneLine();
+            boneLineArray[0] = new SHARED_UHD_BIN.REPACK.FinalBoneLine(new byte[16], endianness);
             boneLineArray[0].BoneId = 0;
             boneLineArray[0].BoneParent = 0xFF; //-1;
 
@@ -177,7 +179,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
             uint firtOffset = (uint)offsetBlockCount;
 
             stream.Position = StartOffset;
-            stream.Write(BitConverter.GetBytes(firtOffset), 0, 4);
+            stream.Write(EndianBitConverter.GetBytes(firtOffset, endianness), 0, 4);
 
             stream.Position = StartOffset + firtOffset;
 
@@ -194,7 +196,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
                     bool EnableColor = EnableVertexColors || CheckDinamicVertexColor.Check(finalBinList[i], EnableDinamicVertexColor);
 
                     SHARED_UHD_BIN.REPACK.BINmakeFile.MakeFile(stream, tempOffset, out outOffset, finalBinList[i],
-                        boneLineArray, material, new byte[0][], true, false, false, false, EnableColor, IsPS4NS);
+                        boneLineArray, material, new byte[0][], true, false, false, false, EnableColor, IsPS4NS, endianness);
                 }
                 else 
                 {
@@ -224,7 +226,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
                 tempOffset = stream.Position;
 
                 stream.Position = StartOffset + (i * 4);
-                stream.Write(BitConverter.GetBytes(InternalOffset), 0, 4);
+                stream.Write(EndianBitConverter.GetBytes(InternalOffset, endianness), 0, 4);
 
                 stream.Position = tempOffset;
 
@@ -236,18 +238,18 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
             uint TplOffset = (uint)stream.Position;
 
             stream.Position = 8;
-            stream.Write(BitConverter.GetBytes(TplOffset), 0, 4);
+            stream.Write(EndianBitConverter.GetBytes(TplOffset, endianness), 0, 4);
             stream.Position = TplOffset;
 
             byte[] Tpl_Padding = new byte[0x10];
-            Tpl_Padding[0] = 0x10;
+            EndianBitConverter.GetBytes((uint)0x10, endianness).CopyTo(Tpl_Padding, 0);
             stream.Write(Tpl_Padding, 0, 0x10);
 
             long startTplOffset = stream.Position;
             long endTplOffset = 0;
 
             //tpl file
-            SHARED_UHD_BIN.REPACK.TPLmakeFile.MakeFile(uhdTPL, stream, startTplOffset, out endTplOffset, IsPS4NS);
+            SHARED_UHD_BIN.REPACK.TPLmakeFile.MakeFile(uhdTPL, stream, startTplOffset, out endTplOffset, IsPS4NS, endianness);
 
             if (createBinFiles)
             {

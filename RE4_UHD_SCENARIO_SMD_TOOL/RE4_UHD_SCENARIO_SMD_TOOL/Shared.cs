@@ -8,8 +8,7 @@ namespace SHARED_UHD_SCENARIO_SMD
 {
     public static class Shared
     {
-
-        public const string VERSION = "B.1.2.2 (2024-02-03)";
+        private const string VERSION = "B.1.2.3 (2025-03-23)";
 
         public static string HeaderText()
         {

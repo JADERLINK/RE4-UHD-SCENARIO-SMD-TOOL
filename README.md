@@ -1,10 +1,10 @@
 # RE4-UHD-SCENARIO-SMD-TOOL
-Extract and repack RE4 UHD/PS4/NS Scenario SMD file
+Extract and repack RE4 UHD/PS4/NS/X360/PS3 Scenario SMD file
 
 **Translate from Portuguese Brazil**
 
 Programa destinado a extrair e recompactar os cenários usando somente um arquivo .OBJ;
-<br>Nota: A versão de UHD é um executável e a versão de Ps4/Ns é outro executável;
+<br>Nota: A versão de UHD é um executável, a versão de PS4/NS é outro executável, e a versão de X360/PS3 também é outro executável;
 
 ## Tutorial
 Veja abaixo tutoriais em português de como usar a tool:
@@ -12,6 +12,10 @@ Veja abaixo tutoriais em português de como usar a tool:
 <br>[RE4 UHD Tutorial Editando r100.SMD](https://jaderlink.blogspot.com/2023/11/RE4-UHD-TUTORIAL-R100-SMD.html)
 
 ## Updates
+
+**Update: B.1.2.3**
+<br>Adicionado suporte para as versões big endians PS3 e X360;
+<br>Aviso: não misture os Bin/Tpl dessa versão com as das outras versões, pois vai dar erro no jogo e o programa não vai mais conseguir extrair o SMD;
 
 **Update: B.1.2.2**
 <br> Melhoria: melhorado a velocidade do repack, agora é muito rápido fazer o repack.
@@ -72,7 +76,7 @@ então, caso esteja usando um .obj de versões anteriores, recalcule as normals;
 
 ## RE4_\*\*_SCENARIO_SMD_TOOL.exe
 
-Programa destinado a extrair e reempacotar os arquivos de cenario .SMD do RE4 Uhd/Ps4/Ns;
+Programa destinado a extrair e reempacotar os arquivos de cenário SMD do RE4 UHD/PS4/NS/X360/PS3;
 
 ## Extract:
 
@@ -187,4 +191,4 @@ Encontra-se no RE4_UHD_SCENARIO_SMD_TOOL\\CjClutter.ObjLoader.Loader, código mo
 **At.te: JADERLINK**
 <br>Thanks to \"mariokart64n\" and \"CodeMan02Fr\"
 <br>Material information by \"Albert\"
-<br>2025-02-03
+<br>2025-03-23

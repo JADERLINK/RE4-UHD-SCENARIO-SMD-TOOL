@@ -5,14 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using SHARED_UHD_BIN.EXTRACT;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_BIN.REPACK
 {
    public static class TPLmakeFile
    {
-        public static void MakeFile(UhdTPL uhdTPL, Stream stream, long startOffset, out long endOffset, bool IsPS4NS) 
+        public static void MakeFile(UhdTPL uhdTPL, Stream stream, long startOffset, out long endOffset, bool IsPS4NS, Endianness endianness) 
         {
-            BinaryWriter bw = new BinaryWriter(stream);
+            EndianBinaryWriter bw = new EndianBinaryWriter(stream, endianness);
             bw.BaseStream.Position = startOffset;
 
             uint length = (uint)uhdTPL.TplArray.Length;

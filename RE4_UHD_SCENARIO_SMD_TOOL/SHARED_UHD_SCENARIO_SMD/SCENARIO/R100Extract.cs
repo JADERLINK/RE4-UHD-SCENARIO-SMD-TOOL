@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using SHARED_UHD_BIN.ALL;
 using SHARED_UHD_BIN.EXTRACT;
-
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 {
@@ -33,7 +33,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 
         private const int FileAmount = 7;
 
-        public static void Extract(FileInfo fileInfo1, bool IsPS4NS) 
+        public static void Extract(FileInfo fileInfo1, bool IsPS4NS, Endianness endianness) 
         {
             string baseDirectory = fileInfo1.Directory.FullName + "\\";
             string baseFileName = Path.GetFileNameWithoutExtension(fileInfo1.Name);
@@ -91,7 +91,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
                 {
                     binAmount = commonBinAmount;
                 }
-                SMDLine[] smdLines = uhdSmdExtract.Extract(smdfile, out uhdBinDic, out uhdTpl, out smdMagic, ref binAmount, IsPS4NS);
+                SMDLine[] smdLines = uhdSmdExtract.Extract(smdfile, out uhdBinDic, out uhdTpl, out smdMagic, ref binAmount, IsPS4NS, endianness);
                 CommonBINcheck(ref commonBinAmount, smdLines);
                 smdfile.Close();
 

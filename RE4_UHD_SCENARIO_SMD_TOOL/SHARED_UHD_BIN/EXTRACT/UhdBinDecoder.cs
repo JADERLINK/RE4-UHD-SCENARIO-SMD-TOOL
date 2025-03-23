@@ -5,25 +5,26 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using SHARED_UHD_BIN.ALL;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_BIN.EXTRACT
 {
     public static class UhdBinDecoder
     {
-        public static UhdBIN Decoder(Stream stream, long startOffset, out long endOffset, bool IsPs4NS) 
+        public static UhdBIN Decoder(Stream stream, long startOffset, out long endOffset, bool IsPs4NS, Endianness endianness) 
         {
             UhdBIN uhdBIN = new UhdBIN();
 
-            BinaryReader br = new BinaryReader(stream);
+            EndianBinaryReader br = new EndianBinaryReader(stream, endianness);
             br.BaseStream.Position = startOffset;
 
             if (IsPs4NS)
             {
                 uhdBIN.Header = GetHeaderPS4NS(br);
             }
-            else 
+            else
             {
-                uhdBIN.Header = GetHeader(br);
+                uhdBIN.Header = GetHeader(br, endianness);
             }
 
             //Quantidade real de vertices/normals, calculado pela montagem de faces
@@ -47,7 +48,7 @@ namespace SHARED_UHD_BIN.EXTRACT
                 uhdBIN.Vertex_Color_Array = new (byte a, byte r, byte g, byte b)[0];
             }
 
-            uhdBIN.Bones = Get_Bones(br, uhdBIN.Header.bone_offset + startOffset, uhdBIN.Header.bone_count);
+            uhdBIN.Bones = Get_Bones(br, uhdBIN.Header.bone_offset + startOffset, uhdBIN.Header.bone_count, endianness);
 
             //WeightMap
             if (uhdBIN.Header.weight_offset != 0 && (uhdBIN.Header.weight_count > 0 || uhdBIN.Header.weight2_count > 0))
@@ -344,7 +345,7 @@ namespace SHARED_UHD_BIN.EXTRACT
 
         }
 
-        private static Bone[] Get_Bones(BinaryReader br, long offset, ushort count) 
+        private static Bone[] Get_Bones(BinaryReader br, long offset, ushort count, Endianness endianness) 
         {
             Bone[] bones = new Bone[count];
            
@@ -352,7 +353,7 @@ namespace SHARED_UHD_BIN.EXTRACT
 
             for (int i = 0; i < count; i++)
             {
-                Bone bone = new Bone();
+                Bone bone = new Bone(endianness);
                 bone.boneLine = br.ReadBytes(0x10);
                 bones[i] = bone;
             }
@@ -470,7 +471,7 @@ namespace SHARED_UHD_BIN.EXTRACT
             return positions;
         }
 
-        private static UhdBinHeader GetHeader(BinaryReader br) 
+        private static UhdBinHeader GetHeader(BinaryReader br, Endianness endianness) 
         {
             UhdBinHeader header = new UhdBinHeader();
 
@@ -494,8 +495,17 @@ namespace SHARED_UHD_BIN.EXTRACT
             header.material_offset = br.ReadUInt32();
 
 
-            header.texture1_flags = br.ReadUInt16();
-            header.texture2_flags = br.ReadUInt16();
+            if (endianness == Endianness.BigEndian)
+            {
+                header.texture2_flags = br.ReadUInt16();
+                header.texture1_flags = br.ReadUInt16();
+            }
+            else 
+            {
+                header.texture1_flags = br.ReadUInt16();
+                header.texture2_flags = br.ReadUInt16();
+            }
+           
             header.TPL_count = br.ReadUInt32();
             header.vertex_scale = br.ReadByte();
             header.unknown_x29 = br.ReadByte();

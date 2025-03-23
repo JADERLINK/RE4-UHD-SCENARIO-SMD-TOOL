@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_BIN.EXTRACT
 {
     public static class UhdTplDecoder
     {
-        public static UhdTPL Decoder(Stream stream, long startOffset, out long endOffset, bool IsPs4NS)
+        public static UhdTPL Decoder(Stream stream, long startOffset, out long endOffset, bool IsPs4NS, Endianness endianness)
         {
             UhdTPL tpl = new UhdTPL();
 
-            BinaryReader br = new BinaryReader(stream);
+            EndianBinaryReader br = new EndianBinaryReader(stream, endianness);
             br.BaseStream.Position = startOffset;
 
             uint magic = br.ReadUInt32();

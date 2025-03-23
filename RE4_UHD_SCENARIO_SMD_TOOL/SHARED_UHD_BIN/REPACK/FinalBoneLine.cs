@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_BIN.REPACK
 {
     public class FinalBoneLine
     {
-        public FinalBoneLine()
-        {
-        }
+        private Endianness endianness;
 
-        public FinalBoneLine(byte[] line)
+        public FinalBoneLine(byte[] line, Endianness endianness)
         {
+            this.endianness = endianness;
             Line = line;
         }
 
-        public FinalBoneLine(byte boneId, byte boneParent, float posX, float posY, float posZ)
+        public FinalBoneLine(byte boneId, byte boneParent, float posX, float posY, float posZ, Endianness endianness)
         {
+            this.endianness = endianness;
             BoneId = boneId;
             BoneParent = boneParent;
             PosX = posX;
@@ -71,11 +72,11 @@ namespace SHARED_UHD_BIN.REPACK
         {
             get
             {
-                return BitConverter.ToSingle(_line, 0x4);
+                return EndianBitConverter.ToSingle(_line, 0x4, endianness);
             }
             set
             {
-                var bvalue = BitConverter.GetBytes(value);
+                var bvalue = EndianBitConverter.GetBytes(value, endianness);
                 bvalue.CopyTo(_line, 0x4);
             }
         }
@@ -84,11 +85,11 @@ namespace SHARED_UHD_BIN.REPACK
         {
             get
             {
-                return BitConverter.ToSingle(_line, 0x8);
+                return EndianBitConverter.ToSingle(_line, 0x8, endianness);
             }
             set
             {
-                var bvalue = BitConverter.GetBytes(value);
+                var bvalue = EndianBitConverter.GetBytes(value, endianness);
                 bvalue.CopyTo(_line, 0x8);
             }
         }
@@ -97,11 +98,11 @@ namespace SHARED_UHD_BIN.REPACK
         {
             get
             {
-                return BitConverter.ToSingle(_line, 0xC);
+                return EndianBitConverter.ToSingle(_line, 0xC, endianness);
             }
             set
             {
-                var bvalue = BitConverter.GetBytes(value);
+                var bvalue = EndianBitConverter.GetBytes(value, endianness);
                 bvalue.CopyTo(_line, 0xC);
             }
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using SHARED_UHD_BIN.ALL;
 using SHARED_UHD_BIN.EXTRACT;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
 {
@@ -17,11 +18,11 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
         //Action<Stream fileStream, long tplOffset, long endOffset>
         public event Action<Stream, long, long> ToFileTpl;
 
-        public SMDLine[] Extract(Stream fileStream, out Dictionary<int, UhdBIN> uhdBinDic, out UhdTPL uhdTpl, out SmdMagic smdMagic, ref int binAmount, bool IsPS4NS)
+        public SMDLine[] Extract(Stream fileStream, out Dictionary<int, UhdBIN> uhdBinDic, out UhdTPL uhdTpl, out SmdMagic smdMagic, ref int binAmount, bool IsPS4NS, Endianness endianness)
         {
-            BinaryReader br = new BinaryReader(fileStream);
+            EndianBinaryReader br = new EndianBinaryReader(fileStream, endianness);
 
-            ushort Magic = br.ReadUInt16();
+            ushort Magic = br.ReadUInt16(Endianness.LittleEndian);
             
             // se não for um desses não é um .SMD valido;
             // nota: tem o magic 0x00000, porem esse crasha o jogo
@@ -75,7 +76,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
                 smdLine.scaleX = br.ReadSingle();
                 smdLine.scaleY = br.ReadSingle();
                 smdLine.scaleZ = br.ReadSingle();
-                smdLine.BinID = br.ReadUInt16();
+                smdLine.BinID = br.ReadUInt16(Endianness.LittleEndian);
                 smdLine.FixedFF = br.ReadByte();
                 smdLine.SmxID = br.ReadByte();
                 smdLine.unused1 = br.ReadUInt32();
@@ -126,7 +127,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
                 long endOffset = binOffsets[i];
                 try
                 {
-                    var uhdBin = UhdBinDecoder.Decoder(fileStream, binOffsets[i], out endOffset, IsPS4NS);
+                    var uhdBin = UhdBinDecoder.Decoder(fileStream, binOffsets[i], out endOffset, IsPS4NS, endianness);
                     UhdBINs.Add(i, uhdBin);
                 }
                 catch (Exception ex)
@@ -151,7 +152,7 @@ namespace SHARED_UHD_SCENARIO_SMD.SCENARIO
             long tplEndOffset = tplOffset;
             try
             {
-                uhdTpl = UhdTplDecoder.Decoder(fileStream, tplOffset, out tplEndOffset, IsPS4NS);
+                uhdTpl = UhdTplDecoder.Decoder(fileStream, tplOffset, out tplEndOffset, IsPS4NS, endianness);
             }
             catch (Exception ex)
             {

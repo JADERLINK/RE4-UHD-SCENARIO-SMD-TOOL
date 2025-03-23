@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SHARED_UHD_BIN.ALL;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_BIN.EXTRACT
 {
@@ -58,15 +59,22 @@ namespace SHARED_UHD_BIN.EXTRACT
 
     public class Bone
     {
+        private Endianness endianness;
+
+        public Bone(Endianness endianness) 
+        {
+            this.endianness = endianness;
+        }
+
         // new byte[16];
         public byte[] boneLine;
 
         public byte BoneID { get { return boneLine[0x0]; } }
         public byte BoneParent { get { return boneLine[0x1]; } }
 
-        public float PositionX { get { return BitConverter.ToSingle(boneLine, 0x4); } }
-        public float PositionY { get { return BitConverter.ToSingle(boneLine, 0x8); } }
-        public float PositionZ { get { return BitConverter.ToSingle(boneLine, 0xC); } }
+        public float PositionX { get { return EndianBitConverter.ToSingle(boneLine, 0x4, endianness); } }
+        public float PositionY { get { return EndianBitConverter.ToSingle(boneLine, 0x8, endianness); } }
+        public float PositionZ { get { return EndianBitConverter.ToSingle(boneLine, 0xC, endianness); } }
 
     }
 

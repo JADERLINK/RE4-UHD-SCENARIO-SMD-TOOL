@@ -4,12 +4,49 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using SimpleEndianBinaryIO;
 
 namespace SHARED_UHD_SCENARIO_SMD
 {
     public static class MainAction
     {
-        public static void Actions(FileInfo fileInfo1, string file1Extension, bool IsPS4NS)
+        public static void MainContinue(string[] args, bool isPS4NS, Endianness endianness) 
+        {
+            System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+            Console.WriteLine(Shared.HeaderText());
+
+            if (args.Length == 0)
+            {
+                Console.WriteLine("For more information read:");
+                Console.WriteLine("https://github.com/JADERLINK/RE4-UHD-SCENARIO-SMD-TOOL");
+                Console.WriteLine("Press any key to close the console.");
+                Console.ReadKey();
+            }
+            else if (args.Length >= 1 && File.Exists(args[0]))
+            {
+                try
+                {
+                    FileInfo fileInfo1 = new FileInfo(args[0]);
+                    string file1Extension = fileInfo1.Extension.ToUpperInvariant();
+                    Console.WriteLine("File1: " + fileInfo1.Name);
+
+                    Actions(fileInfo1, file1Extension, isPS4NS, endianness);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error1: " + ex);
+                }
+            }
+            else
+            {
+                Console.WriteLine("File specified does not exist.");
+            }
+
+            Console.WriteLine("Finished!!!");
+        }
+
+        private static void Actions(FileInfo fileInfo1, string file1Extension, bool IsPS4NS, Endianness endianness)
         {
             // modo de extração
             if (file1Extension == ".SMD")
@@ -29,7 +66,7 @@ namespace SHARED_UHD_SCENARIO_SMD
                 uhdSmdExtract.ToFileBin += toFileMethods.ToFileBin;
                 uhdSmdExtract.ToFileTpl += toFileMethods.ToFileTpl;
                 int binAmount = 0;
-                SCENARIO.SMDLine[] smdLines = uhdSmdExtract.Extract(smdfile, out uhdBinDic, out uhdTpl, out smdMagic, ref binAmount, IsPS4NS);
+                SCENARIO.SMDLine[] smdLines = uhdSmdExtract.Extract(smdfile, out uhdBinDic, out uhdTpl, out smdMagic, ref binAmount, IsPS4NS, endianness);
                 smdfile.Close();
 
                 Dictionary<SHARED_UHD_BIN.ALL.MaterialPart, string> materialList;
@@ -171,7 +208,7 @@ namespace SHARED_UHD_SCENARIO_SMD
 
                 //cria arquivo .smd
                 Console.WriteLine("Creating .SMD file");
-                SCENARIO.MakeSMD_Scenario.CreateSMD(baseDirectory, idxUhdScenario.SmdFileName, objGroupInfos, idxUhdScenario, finalBinList, material, uhdTPL, idxUhdScenario.EnableVertexColor, idxUhdScenario.EnableDinamicVertexColor, true, IsPS4NS);
+                SCENARIO.MakeSMD_Scenario.CreateSMD(baseDirectory, idxUhdScenario.SmdFileName, objGroupInfos, idxUhdScenario, finalBinList, material, uhdTPL, idxUhdScenario.EnableVertexColor, idxUhdScenario.EnableDinamicVertexColor, true, IsPS4NS, endianness);
 
                 //cria um novo idxuhdsmd
                 Console.WriteLine("Creating new .idxuhdsmd");
@@ -191,19 +228,19 @@ namespace SHARED_UHD_SCENARIO_SMD
                 Stream idxFile = fileInfo1.OpenRead();
                 SCENARIO.IdxUhdScenario idxUhdSmd = SCENARIO.IdxUhdScenarioLoader.Loader(new StreamReader(idxFile, Encoding.ASCII));
 
-                SCENARIO.MakeSMD_WithBinFolder.CreateSMD(baseDirectory, idxUhdSmd);
+                SCENARIO.MakeSMD_WithBinFolder.CreateSMD(baseDirectory, idxUhdSmd, endianness);
             }
 
             //R100 extract
             else if (file1Extension == ".R100EXTRACT")
             {
-                SCENARIO.R100Extract.Extract(fileInfo1, IsPS4NS);
+                SCENARIO.R100Extract.Extract(fileInfo1, IsPS4NS, endianness);
             }
 
             //R100 repack
             else if (file1Extension == ".R100REPACK")
             {
-                SCENARIO.R100Repack.Repack(fileInfo1, IsPS4NS);
+                SCENARIO.R100Repack.Repack(fileInfo1, IsPS4NS, endianness);
             }
 
             else
